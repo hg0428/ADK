@@ -1,0 +1,3 @@
+#include libtest.adc
+printLol() // imported straight from C++
+output("test")

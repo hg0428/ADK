@@ -1,0 +1,9 @@
+class String {
+  ~init(x) {
+    this.lit = x
+  }
+
+  funct printLength() {
+    output(this.length)
+  } 
+}

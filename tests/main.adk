@@ -1,0 +1,79 @@
+#include test.adk // -> outputs YOO
+xy = "Hello,"
+output(xy)
+xy.printLength() // -> 6
+xy += "test"
+xy.printLength() // -> 10
+
+output()
+file = open("./tests/ideas.js")
+output(file.read())
+output(file.file_size()) // should be 0.9345
+//Thats great! Files work!
+tes = 5.1
+tes *= 4
+output(tes++)
+output(++tes)
+tes++
+tes--
+tes-=0.4
+output(tes)
+
+class Test {
+	~init(x, y) {
+		this.x=x
+		this.y=y
+	}
+  
+	funct setPos(x, y) {
+		this.x=x
+		this.y=y
+	}
+  
+	funct moveX(amount) {this.x+=amount}
+	funct moveY(amount) {this.y+=amount}
+	funct print() {
+		output("X:", this.x)
+		output("Y:", this.y)
+	}
+}
+
+output()
+
+a=Test(0,0)
+output(a) // [Object unknown] hmmm, thats fine for now, we can fix it in the future.
+a.setPos(8,9)
+a.moveY(-5)
+a.print() // X: 8 --\n--Y: 4
+
+output()
+
+output(xy[0]) // -> H
+output(xy[1]) // -> e
+output(xy[2]) // -> l
+output(xy[3]) // -> l
+output(xy[a.x]) // -> s
+output(xy[5]) // -> ,
+output(xy[6]) // -> t
+output(xy[7]) // -> e
+output(xy[8]) // -> s
+output(xy[9]) // -> t
+
+// Yay, all this code works! (4:01 PM UTC-7)
+// What happened? I haven't changed anything since 4:01! Oh no! (4:26 PM UTC-7)
+
+// Don't worry fixed it all (9:09 AM UTC-7,  11:10 AM EST)
+
+// The problem was that apparently if the last letter or character in the file was a 'whitespace' character like a space it would completely ignore that line.
+// The file reader was the culprit
+
+// Next thing to add is include directives
+// and then we can start making libraries
+
+// oh and also binary expressions
+// haven't gotten around to that yet
+// (9:10 AM UTC-7,  11:11 AM EST)
+
+//
+multi line test
+\\
