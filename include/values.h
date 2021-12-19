@@ -99,6 +99,7 @@ namespace Aardvark {
     Variable Lookup(string name) {
       bool hasVariable = HasVar(name);
       if ((!hasVariable && parent == nullptr) || (!hasVariable && parent == this)) {
+        std::cout << "Error: Could not get variable '" << name << "' as it is not defined." << std::endl;
         throw "Unknown Variable"; // Todo: Fix 'Error'
       } else if (!hasVariable) {
         return parent->Lookup(name);

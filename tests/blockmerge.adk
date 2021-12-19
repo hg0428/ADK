@@ -21,4 +21,4 @@ if x == false {
   }
 }
 
-output(y)
+output(y) // -> 12

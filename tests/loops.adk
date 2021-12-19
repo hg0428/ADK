@@ -1,7 +1,6 @@
 x = 0
 
-while x < 5 {
-  x++
+while x < 5 && x++ {
   output(x)
 }
 

@@ -77,23 +77,23 @@ namespace Aardvark {
   };
 
   // Order of operations. Precedence is defined by the lower value
-  // Lower values are stronger than higher values 
+  // higer values are stronger than lower values 
   // Precedence is used in parser.cpp and parser.h
   inline std::map<string, int> precedence = {
     {"=",  1},
     {"+=", 2},
-    {"++", 2},
     {"-=", 2},
-    {"--", 2},
     {"*=", 2},
     {"/=", 2},
     {"|=", 2},
-    {"&&", 4},
-		{"and", 4},
-    {"||", 5},
-    {"or", 5},
-		{"x|", 5},
-		{"xor", 5},
+    {"||", 4},
+    {"or", 4},
+		{"x|", 4},
+		{"xor", 4},
+		{"and", 5},
+    {"&&", 5},
+    {"++", 6},
+    {"--", 6},
     {"<",  7},
     {">",  7},
     {">=", 7},
@@ -102,9 +102,9 @@ namespace Aardvark {
     {"!=", 7},
     {"+",  10},
     {"-",  10},
-    {"*",  10}, // also all function are defined in lexer.h and token.h
-    {"/",  10}, // it checks in lexer.cpp near the top and does the tokenizing in tokenize
-    {"%",  10}, // Try it and the idea might come in my head and ill be able to help maybe
+    {"*",  20}, // also all function are defined in lexer.h and token.h
+    {"/",  20}, // it checks in lexer.cpp near the top and does the tokenizing in tokenize
+    {"%",  20}, // Try it and the idea might come in my head and ill be able to help maybe
 		{"//",  11}//Where is the code that checks for the symbols?
   };
 

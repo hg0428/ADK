@@ -12,15 +12,15 @@ namespace Aardvark {
   // Helper functions
   bool hasEnding(std::string const &fullString, std::string const &ending) {
     if (fullString.length() >= ending.length()) {
-        return (0 == fullString.compare(fullString.length() - ending.length(), ending.length(), ending));
+      return (0 == fullString.compare(fullString.length() - ending.length(), ending.length(), ending));
     } else {
-        return false;
+      return false;
     }
   }
 
   bool isNumber(std::string token)
   {
-      return std::regex_match(token, std::regex(("((\\+|-)?[[:digit:]]+)(\\.(([[:digit:]]+)?))?")));
+    return std::regex_match(token, std::regex(("((\\+|-)?[[:digit:]]+)(\\.(([[:digit:]]+)?))?")));
   }
 
   // AdkValue -> Aka the Main top node Value class -> Everything "value" inherits it
@@ -1201,8 +1201,28 @@ namespace Aardvark {
 
   AdkValue* Interpreter::iBinary(AST* expr) {
     AdkValue* leftValue = interpret(expr->left, new AdkObject());
-    AdkValue* rightValue = interpret(expr->right, new AdkObject());
     string op = expr->op.toString();
+
+    // These should interpret the right if only the left is evaulated
+    if (op == "||") {
+      if (leftValue->toBool()) {
+        return new AdkValue(true);
+      }
+      
+      AdkValue* rightValue = interpret(expr->right, new AdkObject());
+
+      return *leftValue || *rightValue;
+    } else if (op == "&&") {
+      if (!leftValue->toBool()) {
+        return new AdkValue(false);
+      }
+
+      AdkValue* rightValue = interpret(expr->right, new AdkObject());
+
+      return *leftValue && *rightValue;
+    }
+
+    AdkValue* rightValue = interpret(expr->right, new AdkObject());
 
     // yea idk if this is the best way to do it but oh well
     // maybe make a map with function ptrs and do it that way but this works for now
@@ -1232,10 +1252,6 @@ namespace Aardvark {
       return *leftValue >= *rightValue;
     } else if (op == "<=") {
       return *leftValue <= *rightValue;
-    } else if (op == "||") {
-      return *leftValue || *rightValue;
-    } else if (op == "&&") {
-      return *leftValue && *rightValue;
     }
 
     std::cout << "Error: unrecognized operator '" << op << "'" << std::endl;
