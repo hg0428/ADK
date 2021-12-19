@@ -1,7 +1,11 @@
 #include "aardvark.h"
 #include "parser.h"
 #include "modules/adkFilesystem.hpp"
+
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32) && !defined(__CYGWIN__)
+#else
 #include "modules/adkOs.hpp"
+#endif
 
 using namespace Aardvark;
 
@@ -33,12 +37,19 @@ int main(int argc, char** argv) {
   // // Should be 'AST<17, test>'
   // std::cout << tree->block[3]->toString() << std::endl;
   
+  fs::path executablePath = argv[0];
+  fs::path executableFullPath = fs::current_path() / fs::absolute(executablePath);
   fs::path adkFile = argv[1];
   fs::path fullFile = fs::current_path() / fs::absolute(adkFile);
 
   Interpreter* interpreter = new Interpreter();
+  interpreter->exePath = executableFullPath.string();
   initAdkFS(interpreter);
+
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32) && !defined(__CYGWIN__)
+#else
   interpreter->defineModule("os", initOsModule(interpreter));
+#endif
 
   interpreter->EvaluateFile(fullFile.string());
   

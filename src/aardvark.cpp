@@ -1340,6 +1340,7 @@ namespace Aardvark {
     Interpreter* interp = new Interpreter(tree);
     interp->curFile = file;
     interp->modules = modules;
+    interp->exePath = exePath;
 
     interp->Evaluate(true);
 
@@ -1359,7 +1360,8 @@ namespace Aardvark {
   // Evaluates a file
   // Takes the global ctx and sets all definitions into the current ctx
   AdkContext* Interpreter::EvalBuiltIn(string file, bool putInScope = true) {
-    string info = readFile(file);
+    string pathToFile = (fs::path(exePath).remove_filename() / fs::path("../") / file).string();
+    string info = readFile(pathToFile);
 
     Lexer lexer = Lexer();
     std::vector<Token> tokens = lexer.tokenize(info);
@@ -1370,6 +1372,7 @@ namespace Aardvark {
     Interpreter* interp = new Interpreter(tree);
     interp->curFile = file;
     interp->modules = modules;
+    interp->exePath = exePath;
 
     interp->Evaluate(false);
 
@@ -1396,6 +1399,7 @@ namespace Aardvark {
     interp->ctx = ctx;
     interp->globalCtx = ctx;
     interp->modules = modules;
+    interp->exePath = exePath;
 
     return interp->Evaluate(true);
   }

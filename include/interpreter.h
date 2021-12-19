@@ -14,7 +14,8 @@ namespace Aardvark {
     AdkContext* ctx = nullptr;
     AST* ast;
 
-    std::string curFile = "";
+    string curFile = "";
+    string exePath = "";
 
     map<string, AdkValue*> modules;
 
