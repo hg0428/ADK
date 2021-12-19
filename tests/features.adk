@@ -1,0 +1,9 @@
+funct hi(a, b=0) while b<a.length if a[b] != " " {
+	b++
+	ouput("This should work.")
+}
+
+static funct output(...args) {
+	output("OUTPUT:", ...args)
+}
+hi(a="hello", b=0) // specifing args
