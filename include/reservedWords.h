@@ -14,6 +14,7 @@ namespace Aardvark {
 
   // Each array index is the length of the operators
   // Index 1 means each operator in that array are of length 2
+  // Used in parser.cpp, parser.h, lexer.cpp, and lexer.h
   inline vector<std::map<string, string>> operators = {
     {
       {"=", "="},
@@ -45,6 +46,7 @@ namespace Aardvark {
     },
     {
       {"xor", "x|"},
+			{"not", "x|"},
       {"and", "&&"},
     }
   };
@@ -55,10 +57,12 @@ namespace Aardvark {
 	}
 
   // These are operators with no right hand value or rvalue
+  // Used in parser.cpp and parser.h
   inline vector<string> noRightHand = {
     "++",
     "--"
   };
+  // Used in parser.cpp and parser.h
   inline vector<string> assignments = {
     "=",
     "++",
@@ -69,7 +73,7 @@ namespace Aardvark {
 		"/=",
 		"%=", //modulus
 		"**=", //exponet
-		"|=" // assigns if left is none, else does nothing
+		"|=" // assigns if left is none, else does nothing not implemented yet
   };
 
   // Order of operations. Precedence is defined by the lower value
@@ -119,14 +123,16 @@ namespace Aardvark {
 		{"default", TokenTypes::Keyword},
     {"true", TokenTypes::Boolean},
     {"false", TokenTypes::Boolean},
-		{"none", TokenTypes::None}, //We should have either none, null, or both
-    {"as", TokenTypes::Keyword}, // Can only be used with a # statement, so it does not need to be reserved
+		{"none", TokenTypes::None},
+		{"null", TokenTypes::None},//We should have either none, null, or both
+    {"as", TokenTypes::Keyword},
+		{"in", TokenTypes::Keyword},
     {"static", TokenTypes::Keyword},
     {"break", TokenTypes::Keyword},
     {"continue", TokenTypes::Keyword},
-		{"static", TokenTypes::Keyword},
 		{"reference", TokenTypes::Keyword},
-		{"private", TokenTypes::Keyword}
+		{"private", TokenTypes::Keyword},
+		{"await", TokenTypes::Keyword},
   };
 }; // namespace Aardvark
 

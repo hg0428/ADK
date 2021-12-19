@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ast.h"
 #include "parser.h"
 #include "aardvark.h"
 #include "fileHandler.hpp"
@@ -8,6 +9,7 @@ namespace fs = std::filesystem;
 
 namespace Aardvark {
 
+  // Helper functions
   bool hasEnding(std::string const &fullString, std::string const &ending) {
     if (fullString.length() >= ending.length()) {
         return (0 == fullString.compare(fullString.length() - ending.length(), ending.length(), ending));
@@ -21,7 +23,7 @@ namespace Aardvark {
       return std::regex_match(token, std::regex(("((\\+|-)?[[:digit:]]+)(\\.(([[:digit:]]+)?))?")));
   }
 
-  // AdkValue
+  // AdkValue -> Aka the Main top node Value class -> Everything "value" inherits it
   AdkValue::AdkValue() {
     this->type = DataTypes::None;
     this->data = nullptr;
@@ -42,6 +44,10 @@ namespace Aardvark {
     this->type = DataTypes::Double;
     this->data = new double(val);
   }
+  AdkValue::AdkValue(bool val) {
+    this->type = DataTypes::Boolean;
+    this->data = new bool(val);
+  }
 
   AdkValue* AdkValue::operator+(AdkValue& val) {
     if (type == DataTypes::Int) {
@@ -56,7 +62,7 @@ namespace Aardvark {
         return new AdkValue(cast<double>() + val.cast<double>());
       } else if (val.type == DataTypes::Int) {
         double thisVal = cast<double>();
-        int secondVal = val.cast<int>(); // it was like this. That makes sense
+        int secondVal = val.cast<int>();
 
         return new AdkValue(thisVal + ((double)secondVal));
       }
@@ -129,6 +135,256 @@ namespace Aardvark {
     return this;
   }
 
+  AdkValue* AdkValue::operator%(AdkValue& val) {
+    if (type == DataTypes::Int) {
+      if (val.type == DataTypes::Int) {
+        return new AdkValue(cast<int>() % val.cast<int>());
+      } else if (val.type == DataTypes::Double) {
+        return new AdkValue(cast<int>() % ((int)val.cast<double>()));
+      }
+    } else if (type == DataTypes::Double) {
+      if (val.type == DataTypes::Double) {
+        return new AdkValue(((int)cast<double>()) % ((int)val.cast<double>()));
+      } else if (val.type == DataTypes::Int) {
+        return new AdkValue(((int)cast<double>()) % val.cast<int>());
+      }
+    }
+
+    return this;
+  }
+
+  AdkValue* AdkValue::operator>(AdkValue& val) {
+    if (type == DataTypes::Int) {
+      if (val.type == DataTypes::Int) {
+        return new AdkValue(cast<int>() > val.cast<int>());
+      } else if (val.type == DataTypes::Double) {
+        int valData = cast<int>();
+
+        return new AdkValue(((double)valData) > val.cast<double>());
+      }
+    } else if (type == DataTypes::Double) {
+      if (val.type == DataTypes::Double) {
+        return new AdkValue(cast<double>() > val.cast<double>());
+      } else if (val.type == DataTypes::Int) {
+        int valData = val.cast<int>();
+        return new AdkValue(cast<double>() > ((double)valData));
+      }
+    }
+
+    return this;
+  }
+
+  AdkValue* AdkValue::operator>=(AdkValue& val) {
+    if (type == DataTypes::Int) {
+      if (val.type == DataTypes::Int) {
+        return new AdkValue(cast<int>() >= val.cast<int>());
+      } else if (val.type == DataTypes::Double) {
+        int valData = cast<int>();
+
+        return new AdkValue(((double)valData) >= val.cast<double>());
+      }
+    } else if (type == DataTypes::Double) {
+      if (val.type == DataTypes::Double) {
+        return new AdkValue(cast<double>() >= val.cast<double>());
+      } else if (val.type == DataTypes::Int) {
+        int valData = val.cast<int>();
+        return new AdkValue(cast<double>() >= ((double)valData));
+      }
+    }
+
+    return this;
+  }
+
+  AdkValue* AdkValue::operator==(AdkValue& val) {
+    if (type == DataTypes::Int) {
+      if (val.type == DataTypes::Int) {
+        return new AdkValue(cast<int>() == val.cast<int>());
+      } else if (val.type == DataTypes::Double) {
+        int valData = cast<int>();
+
+        return new AdkValue(((double)valData) == val.cast<double>());
+      }
+    } else if (type == DataTypes::Double) {
+      if (val.type == DataTypes::Double) {
+        return new AdkValue(cast<double>() == val.cast<double>());
+      } else if (val.type == DataTypes::Int) {
+        int valData = val.cast<int>();
+        return new AdkValue(cast<double>() == ((double)valData));
+      }
+    } else if (type == DataTypes::Boolean) {
+      if (val.type == DataTypes::Boolean) {
+        return new AdkValue(toBool() == val.toBool());
+      }
+    }
+
+    return new AdkValue(false);
+  }
+
+  AdkValue* AdkValue::operator!=(AdkValue& val) {
+    if (type == DataTypes::Int) {
+      if (val.type == DataTypes::Int) {
+        return new AdkValue(cast<int>() != val.cast<int>());
+      } else if (val.type == DataTypes::Double) {
+        int valData = cast<int>();
+
+        return new AdkValue(((double)valData) != val.cast<double>());
+      }
+    } else if (type == DataTypes::Double) {
+      if (val.type == DataTypes::Double) {
+        return new AdkValue(cast<double>() != val.cast<double>());
+      } else if (val.type == DataTypes::Int) {
+        int valData = val.cast<int>();
+        return new AdkValue(cast<double>() != ((double)valData));
+      }
+    }
+
+    return this;
+  }
+
+  AdkValue* AdkValue::operator<(AdkValue& val) {
+    if (type == DataTypes::Int) {
+      if (val.type == DataTypes::Int) {
+        return new AdkValue(cast<int>() < val.cast<int>());
+      } else if (val.type == DataTypes::Double) {
+        int valData = cast<int>();
+
+        return new AdkValue(((double)valData) < val.cast<double>());
+      }
+    } else if (type == DataTypes::Double) {
+      if (val.type == DataTypes::Double) {
+        return new AdkValue(cast<double>() < val.cast<double>());
+      } else if (val.type == DataTypes::Int) {
+        int valData = val.cast<int>();
+        return new AdkValue(cast<double>() < ((double)valData));
+      }
+    }
+
+    return this;
+  }
+
+  AdkValue* AdkValue::operator<=(AdkValue& val) {
+    if (type == DataTypes::Int) {
+      if (val.type == DataTypes::Int) {
+        return new AdkValue(cast<int>() <= val.cast<int>());
+      } else if (val.type == DataTypes::Double) {
+        int valData = cast<int>();
+
+        return new AdkValue(((double)valData) <= val.cast<double>());
+      }
+    } else if (type == DataTypes::Double) {
+      if (val.type == DataTypes::Double) {
+        return new AdkValue(cast<double>() <= val.cast<double>());
+      } else if (val.type == DataTypes::Int) {
+        int valData = val.cast<int>();
+        return new AdkValue(cast<double>() <= ((double)valData));
+      }
+    }
+
+    return this;
+  }
+
+  AdkValue* AdkValue::operator&&(AdkValue& val) {
+    if (type == DataTypes::Int) {
+      if (val.type == DataTypes::Int) {
+        return new AdkValue(cast<int>() && val.cast<int>());
+      } else if (val.type == DataTypes::Double) {
+        int valData = cast<int>();
+
+        return new AdkValue(((double)valData) && val.cast<double>());
+      }
+    } else if (type == DataTypes::Double) {
+      if (val.type == DataTypes::Double) {
+        return new AdkValue(cast<double>() && val.cast<double>());
+      } else if (val.type == DataTypes::Int) {
+        int valData = val.cast<int>();
+        return new AdkValue(cast<double>() && ((double)valData));
+      }
+    }
+
+    return this;
+  }
+
+  AdkValue* AdkValue::operator||(AdkValue& val) {
+    if (type == DataTypes::Int) {
+      if (val.type == DataTypes::Int) {
+        return new AdkValue(cast<int>() || val.cast<int>());
+      } else if (val.type == DataTypes::Double) {
+        int valData = cast<int>();
+
+        return new AdkValue(((double)valData) || val.cast<double>());
+      }
+    } else if (type == DataTypes::Double) {
+      if (val.type == DataTypes::Double) {
+        return new AdkValue(cast<double>() || val.cast<double>());
+      } else if (val.type == DataTypes::Int) {
+        int valData = val.cast<int>();
+        return new AdkValue(cast<double>() || ((double)valData));
+      }
+    }
+
+    return this;
+  }
+
+  bool AdkValue::toBool() {
+    // Checks the type of the object and converts it accordingly
+    switch(type) {
+      case DataTypes::Boolean:
+        return cast<bool>();
+
+      case DataTypes::Int:
+        return (cast<int>() > 0);
+
+      case DataTypes::Double:
+        return (cast<double>() > 0.0);
+			
+			case DataTypes::String:
+        return (cast<string>() != "");
+      default:
+        return false;
+    }
+  }
+
+  int AdkValue::toInt() {
+    // Checks the type of the object and converts it accordingly
+    switch(type) {
+      case DataTypes::Int:
+        return cast<int>();
+
+      case DataTypes::Double:
+        return (int)(cast<double>());
+
+      case DataTypes::Boolean:
+        return (int)(cast<bool>());
+
+      default:
+        return 0;
+    }
+  }
+
+  double AdkValue::toDouble() {
+    // Checks the type of the object and converts it accordingly
+    switch(type) {
+      case DataTypes::Double:
+        return cast<double>();
+
+      case DataTypes::Int:
+        return (double)(cast<int>());
+
+      case DataTypes::Boolean:
+        return (double)(cast<bool>());
+
+      default:
+        return 0.0;
+    }
+  }
+
+  // This method 'toString()' will create a string representation
+  // of the current object/value
+
+  // Probably will change to an overridable method
+  // So it will be cleaner code
+  // Maybe even make AdkNumber class and AdkString classes
+  // but that will be for later
   string AdkValue::toString() {
     switch(type) {
       case DataTypes::String:
@@ -136,7 +392,7 @@ namespace Aardvark {
         
       case DataTypes::Object: {
         AdkObject* cls = (AdkObject*)this;
-        if (cls->objType == "String") {
+        if (cls->objType == "String") { // AdkObject String to raw string
           AdkValue* length = cls->Get("length").value;
           string str = "";
 
@@ -149,13 +405,10 @@ namespace Aardvark {
           return str;
         }
 
-        // well you could probably do something like added other operators and maybe working in the parser and lexer
-        // the parser is pretty much a bunch of if statements and class structures
-        // its recursive so its just a bunch of funtion calls
-        // try implementing if statements
-				//Ok, I will try that, if I get the chance today.
         if (cls->objType.size() > 0) {
           std::ostringstream str;
+					//Change to [ClassName VariableName]
+					//Not all classes are objects, except in JS.
           str << "[Object ";
           str << cls->objType;
           str << "]";
@@ -173,8 +426,12 @@ namespace Aardvark {
         return str.str();
       }
 
+      case DataTypes::Boolean: {
+        return cast<bool>() ? "true" : "false";
+      }
+
       case DataTypes::None:
-        return "[None]";
+        return "null";
 
       default:
         std::ostringstream str;
@@ -235,53 +492,120 @@ namespace Aardvark {
     this->func = func;
     this->name = name;
     this->interpreter = new Interpreter(*interp);
+    this->info = new AST(ASTTypes::None, Token(TokenTypes::Identifier, name));
   }
 
   AdkValue* AdkFunction::Call(vector<AST*> args, AdkValue* thisObj) {
-    vector<AdkValue*> evalArgs = {};
+    vector<AdkValue*> evalArgs = {}; // The interpreted arguments
 
+    // Loops through each AST* argument (which is just an uninterpreted, parsed arg)
     for (AST* arg : args) {
+      // Evaluates the argument and pushes it to the list
       AdkValue* evaledArg = interpreter->interpret(arg, new AdkObject());
       evalArgs.push_back(evaledArg);
     }
 
+    // Does another call but this time with the evaluated arguments
+    // See the overloaded method below 
     return Call(evalArgs, thisObj);
   }
 
   AdkValue* AdkFunction::Call(vector<AdkValue*> args, AdkValue* thisObj) {
-    AdkContext oldCtx = *interpreter->ctx;
-    interpreter->ctx = new AdkContext();
-    interpreter->ctx->parent = oldCtx.parent;
-    interpreter->ctx->variables = oldCtx.variables;
+    // AdkContext oldCtx = *interpreter->ctx;
+    // interpreter->ctx = new AdkContext();
+    // interpreter->ctx->parent = oldCtx.parent;
+    // interpreter->ctx->variables = oldCtx.variables;
+    AdkObject* currentThis = interpreter->ctx->HasVar("this")
+      ? (AdkObject*)interpreter->ctx->Get("this").value
+      : new AdkObject();
 
-    interpreter->ctx->Set("this", thisObj);
+    string funcName = info->value.toString();
+    bool isManipulator = funcName[0] == '~' || (
+      currentThis->HasProp("name") &&
+      currentThis->Get("name").value->toString() == "~on_funct_call"
+    );
+
+    // This is quite messy and maybe should be implemented different
+    // This is the implementation of manipulating the global scope
+    // Basically creating event listeners for specific things
+    // This one is for funtion calls
+    // if (
+    //   !isManipulator &&
+    //   interpreter->globalCtx->HasVar("~on_funct_call")
+    //  ) {
+    //   AdkFunction* on_funct_call = (AdkFunction*)interpreter->globalCtx->Get("~on_funct_call").value;
+
+    //   AdkObject* functionInfo = new AdkObject(funcName);
+    //   functionInfo->Set("name", interpreter->ConstructString(funcName));
+
+    //   vector<AdkValue*> eventArgs = {
+    //     (AdkValue*)functionInfo
+    //   };
+
+    //   AdkObject* newObj = new AdkObject("~on_funct_call");
+    //   newObj->Set("name", interpreter->ConstructString("~on_funct_call"));
+
+      
+    //   interpreter->ctx = interpreter->ctx->Extend();
+    //   on_funct_call->Call(eventArgs, newObj);
+    //   interpreter->ctx = interpreter->ctx->parent;
+    // }
+
+    // Extends the current context aka the 'scope'
+    interpreter->ctx = interpreter->ctx->Extend();
+
+    interpreter->ctx->Set("this", thisObj); // Sets the 'this' value
 
     if (func != nullptr) {
+      // Calls the Native C++ function
       AdkValue* returnValue = func(args, interpreter);
 
-      interpreter->ctx = oldCtx.Extend();
+      // Returns to the old scope
+      interpreter->ctx = interpreter->ctx->parent;
+      // interpreter->ctx = oldCtx.Extend();
 
       return returnValue;
     }
 
+    // Interprets all passed arguments / parameters
+    // Only interprets up to the function max paramlist
+    // eg: funct test(x, y) {}; -> only has 2 params so max is 2
     for (int i = 0; i < info->args.size(); i++) {
       AST* argDef = info->args[i];
 
+      // if there is only a few arguments passed the rest will be 'none' aka 'null'
+      /* eg:
+          funct test(x, y) {};
+
+          test(5) // -> the y argument will be 'none' \\
+      */
       if (i >= args.size()) {
+        // argDef is an AST* type and to get the name of that argument is
+        // stored in the token called value
         interpreter->ctx->Set(argDef->value.toString(), new AdkValue());
         continue;
       }
 
+      // Sets the argument in the current scopes variable list with the interpreted argument
       interpreter->ctx->Set(argDef->value.toString(), args[i]);
     }
 
     AdkValue* returnValue = new AdkValue();
 
     for (AST* exp : info->block) {
+      // Interprets every value in the function body
       returnValue = interpreter->interpret(exp, new AdkObject());
+
+      if (returnValue->returned) {
+        // Returns to the old scope
+        interpreter->ctx = interpreter->ctx->parent;
+        return returnValue;        
+      }
     }
 
-    interpreter->ctx = oldCtx.Extend();
+    // Returns to the old scope
+    interpreter->ctx = interpreter->ctx->parent;
+    // interpreter->ctx = oldCtx.Extend();
 
     return returnValue;
   }
@@ -290,36 +614,47 @@ namespace Aardvark {
   AdkClass::AdkClass() {
     this->className = "_anon_";
     this->thisObj = new AdkObject();
+    this->staticValues = new AdkObject("_anon_");
     this->interpreter = nullptr;
   }
   AdkClass::AdkClass(Interpreter* interp, string className): AdkValue(DataTypes::Class) {
     this->className = className;
     this->thisObj = new AdkObject();
+    this->staticValues = new AdkObject(className);
     this->interpreter = interp;
   }
   AdkClass::AdkClass(Interpreter* interp, string className, AdkObject* thisObj): AdkValue(DataTypes::Class) {
     this->className = className;
     this->thisObj = thisObj;
+    this->staticValues = new AdkObject(className);
     this->interpreter = interp;
   }
 
+  // Creates a new Instance of a class
   AdkValue* AdkClass::NewInstance(vector<AdkValue*> args) {
     AdkObject* obj = thisObj->Copy();
+    // Copies the 'obj instructions' or the defined obj with default values
+    // so that every instance has its own values
 
+    // Gets the initial 'constructor' method
     AdkFunction* func = (AdkFunction*)thisObj->Get("~init").value;
 	
+    // sets the interpreter so it can be accessed later
     func->interpreter = interpreter;
     
+    // calls the 'constructor' / 'initial' method
     func->Call(args, obj);
-    return obj;
+    return obj; // returns the new object
   }
 
   // Interpreter
   AdkValue* Interpreter::iScope(AST* expr) {
+    // Loops through each expression in the current scope
+    // and evaluates it
     for (AST* exp : expr->block) {
       AdkValue* returnVal = interpret(exp, new AdkObject());
 
-      if (returnVal != nullptr && returnVal->returnedVal) {
+      if (returnVal != nullptr && returnVal->returned) {
         return returnVal;
       }
     }
@@ -335,11 +670,26 @@ namespace Aardvark {
     ctx = ctx->Extend();
     for (AST* exp : expr->block) {
       AdkValue* value = interpret(exp, cls->thisObj);
-      cls->thisObj->Set(exp->value.toString(), value);
+
+      // Checks if it is a function and is a static class member
+      // if it is it assigns it as a static member instead of a regular
+      // property
+      if (value->type == DataTypes::Function) {
+        bool isStatic = ((AdkFunction*)value)->isStatic;
+        
+        if (isStatic) {
+          cls->Set(exp->value.toString(), value);
+          continue;
+        }
+      }
+
+      // Sets the value property to the obj
+      cls->thisObj->Set(exp->value.toString(), value); 
     }
     // cls->props = ctx->variables;
     ctx = oldCtx;
 
+    // Defines the 'class' in the current scope
     return ctx->Set(expr->value.toString(), (AdkValue*)cls).value;
   }
 
@@ -348,6 +698,7 @@ namespace Aardvark {
     string name = identifier.toString();
 
     AdkFunction* func = new AdkFunction(this, expr);
+    func->isStatic = expr->isStatic;
 
     if (thisObj->isNone()) {
       ctx->Set(name, func);
@@ -528,8 +879,17 @@ namespace Aardvark {
 
     if (expr->access != nullptr) {
       // Checks if the value is accessible
-      if (value->type != DataTypes::Object && value->type != DataTypes::String) {
+      if (
+        value->type != DataTypes::Object &&
+        value->type != DataTypes::String &&
+        value->type != DataTypes::Class
+      ) {
+        std::cout << "Error: Cannot read property of primitive values" << std::endl;
         throw "Cannot read property of undefined."; // Todo: Fix 'error'
+      }
+
+      if (value->type == DataTypes::Class) {
+        value = ((AdkClass*)value)->staticValues;
       }
 
       // Checks on types to access a value
@@ -560,11 +920,15 @@ namespace Aardvark {
 
   AdkValue* Interpreter::iFunctionCall(AST* expr, AdkObject* thisObj = new AdkObject()) {
     Token identifier = expr->value;
-    // std::cout << "Get: " << identifier.toString() << "<< END;" << std::endl;
     
-    AdkValue* func = (expr->parent == nullptr || thisObj->isNone())
+    AdkValue* func = (expr->parent == nullptr && thisObj->isNone())
       ? ctx->Get(identifier.toString()).value
       : thisObj->Get(identifier.toString()).value;
+
+    if (func->isNone()) {
+      std::cout << "Error: Cannot call value that is undefined!" << std::endl; // Todo: Fix "error"
+      throw "err";
+    }
 
     vector<AdkValue*> args = {};
 
@@ -642,6 +1006,13 @@ namespace Aardvark {
     return new AdkValue(number);
   }
 
+  AdkValue* Interpreter::iBoolean(AST* expr) {
+    Token boolTok = expr->value;
+    bool boolean = boolTok.toString() == "true";
+
+    return new AdkValue(boolean);
+  }
+
   AdkValue* Interpreter::GetDynamicLib(string fileName) {
     DynamicLib lib = DynamicLib(fileName);
 
@@ -650,7 +1021,7 @@ namespace Aardvark {
     std::shared_ptr<InitFunction> init = lib.GetSymbol<InitFunction>("initmodule");
     AdkModule* module = (*init)(this);
     ModuleInfo* info = module->info;
-    AdkObject* obj = new AdkObject("C ImpCModule");
+    AdkObject* obj = new AdkObject("C AdkCModule");
 
     const char* moduleName = info->moduleName;
     std::vector<Definition> definitions = info->definitions;
@@ -737,6 +1108,140 @@ namespace Aardvark {
     return new AdkValue();
   }
 
+  AdkValue* Interpreter::iWhile(AST* expr, AdkObject* thisObj = new AdkObject()) {
+    // AST* condition = expr->condition;
+    // Bug every loop variables get reset
+    // This happens because they are copied this needs to be fixed
+    // at least for the closures
+    while (true) {
+      if (!interpret(expr->condition, thisObj)->toBool()) {
+        break;
+      }
+
+      ctx = ctx->Extend();
+      for (AST* exp : expr->block) {
+
+        if (exp->type == ASTTypes::Break) {
+          ctx = ctx->parent;
+          return new AdkValue();
+        } else if (exp->type == ASTTypes::Continue) {
+          break; // this breaks out the for loop basically doing a continue
+        }
+
+        AdkValue* returnVal = interpret(exp, thisObj);
+
+        if (returnVal->returned) {
+          ctx = ctx->parent;
+          return returnVal;
+        }
+      }
+      ctx = ctx->parent;
+    }
+
+    return new AdkValue();
+  }
+
+  AdkValue* Interpreter::iNone(AST* expr) {
+    return new AdkValue();
+  }
+
+  AdkValue* Interpreter::iReturn(AST* expr) {
+    AdkValue* returnVal = interpret(expr->assign, new AdkObject());
+    returnVal->returned = true;
+
+    return returnVal;
+  }
+
+  AdkValue* Interpreter::iBreak(AST* expr) {
+    AdkValue* breakVal = new AdkValue();
+    breakVal->breaked = true;
+
+    return breakVal;
+  }
+
+  AdkValue* Interpreter::iContinue(AST* expr) {
+    AdkValue* continueVal = new AdkValue();
+    continueVal->continued = true;
+
+    return continueVal;
+  }
+
+  AdkValue* Interpreter::iIf(AST* expr, AdkObject* thisObj) {
+    AST* conditionAST = expr->condition;
+    AdkValue* condition = interpret(conditionAST, thisObj);
+
+    if (condition->toBool()) {
+      for (AST* exp : expr->block) {
+        AdkValue* returnValue = interpret(exp, thisObj);
+
+        if (
+          returnValue->returned ||
+          returnValue->continued ||
+          returnValue->breaked
+        ) {
+          return returnValue;
+        }
+      }
+    } else if (expr->els != nullptr) {
+      for (AST* exp : expr->els->block) {
+        AdkValue* returnValue = interpret(exp, thisObj);
+
+        if (
+          returnValue->returned ||
+          returnValue->continued ||
+          returnValue->breaked
+        ) {
+          return returnValue;
+        }
+      }
+    }
+
+    return new AdkValue();
+  }
+
+  AdkValue* Interpreter::iBinary(AST* expr) {
+    AdkValue* leftValue = interpret(expr->left, new AdkObject());
+    AdkValue* rightValue = interpret(expr->right, new AdkObject());
+    string op = expr->op.toString();
+
+    // yea idk if this is the best way to do it but oh well
+    // maybe make a map with function ptrs and do it that way but this works for now
+
+    // Todo: Make this better
+    if (op == "+") {
+      return *leftValue + *rightValue;
+    } else if (op == "-") {
+      return *leftValue - *rightValue;
+    } else if (op == "*") {
+      return *leftValue * *rightValue;
+    } else if (op == "/") {
+      return *leftValue / *rightValue;
+    } else if (op == "%") {
+      return *leftValue % *rightValue;
+    } else if (op == "-") {
+      return *leftValue - *rightValue;
+    } else if (op == "==") {
+      return *leftValue == *rightValue;
+    } else if (op == "!=") {
+      return *leftValue != *rightValue;
+    } else if (op == ">") {
+      return *leftValue > *rightValue;
+    } else if (op == "<") {
+      return *leftValue < *rightValue;
+    } else if (op == ">=") {
+      return *leftValue >= *rightValue;
+    } else if (op == "<=") {
+      return *leftValue <= *rightValue;
+    } else if (op == "||") {
+      return *leftValue || *rightValue;
+    } else if (op == "&&") {
+      return *leftValue && *rightValue;
+    }
+
+    std::cout << "Error: unrecognized operator '" << op << "'" << std::endl;
+    throw "err"; // Todo: Fix 'error'
+  }
+
   AdkValue* Interpreter::interpret(AST* expr, AdkObject* thisObj = new AdkObject()) {
     switch (expr->type) {
       case ASTTypes::Scope:
@@ -757,8 +1262,14 @@ namespace Aardvark {
       case ASTTypes::Identifier:
         return iIdentifier(expr, thisObj);
 
+      case ASTTypes::Binary:
+        return iBinary(expr);
+
       case ASTTypes::String:
         return iString(expr);
+
+      case ASTTypes::Boolean:
+        return iBoolean(expr);
 
       case ASTTypes::Int:
         return iInt(expr);
@@ -768,6 +1279,24 @@ namespace Aardvark {
 
       case ASTTypes::Include:
         return iInclude(expr, thisObj);
+
+      case ASTTypes::While:
+        return iWhile(expr, thisObj);
+
+      case ASTTypes::None:
+        return iNone(expr);
+
+      case ASTTypes::Return:
+        return iReturn(expr);
+
+      case ASTTypes::Break:
+        return iBreak(expr);
+
+      case ASTTypes::Continue:
+        return iContinue(expr);
+
+      case ASTTypes::If:
+        return iIf(expr, thisObj);
     }
   }
 
@@ -794,6 +1323,7 @@ namespace Aardvark {
 
     Interpreter* interp = new Interpreter(tree);
     interp->curFile = file;
+    interp->modules = modules;
 
     interp->Evaluate(true);
 
@@ -823,6 +1353,7 @@ namespace Aardvark {
 
     Interpreter* interp = new Interpreter(tree);
     interp->curFile = file;
+    interp->modules = modules;
 
     interp->Evaluate(false);
 
@@ -847,6 +1378,8 @@ namespace Aardvark {
     Interpreter* interp = new Interpreter(tree);
     interp->curFile = file;
     interp->ctx = ctx;
+    interp->globalCtx = ctx;
+    interp->modules = modules;
 
     return interp->Evaluate(true);
   }
@@ -876,16 +1409,19 @@ namespace Aardvark {
   Interpreter::Interpreter() {
     this->ast = nullptr;
     this->ctx = new AdkContext();
+    this->globalCtx = this->ctx;
   }
 
   Interpreter::Interpreter(AST* ast) {
     this->ast = ast;
     this->ctx = new AdkContext();
+    this->globalCtx = this->ctx;
   }
 
   Interpreter::Interpreter(Interpreter& o) {
     this->ast = o.ast;
     this->ctx = o.ctx;
+    this->globalCtx = o.globalCtx;
   }
 
 }; // namespace Aardvark

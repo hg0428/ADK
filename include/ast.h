@@ -10,15 +10,15 @@ namespace Aardvark {
     While, // 1
     For, // 2
     If, // 3
-    Int, // 4
-    Double, // 5
-    String, // 6
-    Boolean, // 7
-    Class, // 8
-    Object, // 9
-    Array, // 10
-    Variable, // 11
-    Import, // 12 What is this one for? 
+    Else, // 4
+    Int, // 5
+    Double, // 6
+    String, // 7
+    Boolean, // 8
+    Class, // 9
+    Object, // 10
+    Array, // 11
+    Variable, // 12
     Identifier, // 13
     Assign, // 14
     Binary, // 15
@@ -56,7 +56,7 @@ namespace Aardvark {
     // If
     AST* condition;
     AST* then;
-    AST* els;
+    AST* els = nullptr;
 
     // For
     AST* reassign;

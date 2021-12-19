@@ -6,6 +6,7 @@ namespace Aardvark {
     String,
     Int,
     Double,
+    Boolean,
     Object,
     Class,
     Function,
@@ -14,7 +15,5 @@ namespace Aardvark {
 
 }; // namespace Aardvark
 /*
-Add Booleen, 
-List,
-and more later
+Add List, and more later
 */

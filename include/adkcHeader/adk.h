@@ -42,7 +42,7 @@ namespace Aardvark {
 #endif
 
 Aardvark::AdkModule* CreateModule(Aardvark::ModuleInfo* info) {
-  Aardvark::AdkValue* obj = (Aardvark::AdkValue*)(new Aardvark::AdkObject("C ImpCModule"));
+  Aardvark::AdkValue* obj = (Aardvark::AdkValue*)(new Aardvark::AdkObject("C AdkCModule"));
 
   return new Aardvark::AdkModule(info, obj);
 }

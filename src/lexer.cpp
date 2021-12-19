@@ -64,7 +64,7 @@ namespace Aardvark {
         return *(string*)value;
 
       case TokenTypes::Boolean:
-        return (*(bool*)value) ? "True" : "False";
+        return ((*(string*)value) == "true") ? "true" : "false";
 
       case TokenTypes::Linebreak:
         return "Linebreak";
@@ -245,7 +245,7 @@ namespace Aardvark {
         advance();
       }
 
-      if (curChar == '#') { // Comment
+      if (curChar == '#') { // Directives
         string value = "";
         advance();
         while (!isWhitespace(curChar)) {
@@ -270,6 +270,7 @@ namespace Aardvark {
         tokens.push_back(tok2);
       }
 
+      // Comments
       if (curChar == '/' && peek() == '/') {
         advance();
         advance();
@@ -282,7 +283,7 @@ namespace Aardvark {
           advance();
           advance();
         } else {
-          while (curChar != '\n') {
+          while (curChar != '\n' && curChar != '\0') {
             advance();
           }
         }

@@ -1,0 +1,24 @@
+class Lol {
+  ~init() {
+    output(this.test())
+  }
+
+  static funct test() {
+    return 5
+  }
+}
+
+Lol() // -> 5
+
+output(Lol.test()) // -> 5
+
+i = 0
+while true {
+  i++
+  i++
+  i++
+  i++
+  break
+}
+
+output(i) // -> 4

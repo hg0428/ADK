@@ -1,0 +1,24 @@
+x = false
+output(x == false)
+
+y = 0
+
+if x while y < 6 {
+  y++
+}
+
+output(y) // -> 0
+
+if x == false while y < 6 {
+  y++
+}
+
+output(y) // -> 6
+
+if x == false {
+  while y < 12 {
+    y++
+  }
+}
+
+output(y)

@@ -1,6 +1,6 @@
 #include test.adk // -> outputs YOO
 xy = "Hello,"
-output(xy)
+output(xy) // -> Hello,
 xy.printLength() // -> 6
 xy += "test"
 xy.printLength() // -> 10
@@ -9,15 +9,14 @@ output()
 file = open("./tests/ideas.js")
 output(file.read())
 output(file.file_size()) // should be 0.9345
-//Thats great! Files work!
 tes = 5.1
 tes *= 4
-output(tes++)
-output(++tes)
+output(tes++) // -> 20.4
+output(++tes) // -> 22.4
 tes++
 tes--
 tes-=0.4
-output(tes)
+output(tes) // -> 22
 
 class Test {
 	~init(x, y) {
@@ -30,8 +29,16 @@ class Test {
 		this.y=y
 	}
   
-	funct moveX(amount) {this.x+=amount}
-	funct moveY(amount) {this.y+=amount}
+	funct moveX(amount) {
+    this.x+=amount
+
+    output(this.x)
+  }
+	funct moveY(amount) {
+    this.y+=amount
+
+    output(this.y)
+  }
 	funct print() {
 		output("X:", this.x)
 		output("Y:", this.y)
@@ -41,7 +48,7 @@ class Test {
 output()
 
 a=Test(0,0)
-output(a) // [Object unknown] hmmm, thats fine for now, we can fix it in the future.
+output(a)
 a.setPos(8,9)
 a.moveY(-5)
 a.print() // X: 8 --\n--Y: 4

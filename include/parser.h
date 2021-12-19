@@ -24,6 +24,8 @@ namespace Aardvark {
     void skipOver(TokenTypes type, string val, Token tok);
 
     vector<AST*> pDelimiters(string start, string end, string separator);
+
+    bool isBlockMerger(Token tok);
     
     bool isCallable(AST* callStmt);
     AST* checkCall(AST* expr);

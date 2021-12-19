@@ -1,4 +1,5 @@
 #include "./datastructs/datatypes.h"
+#include <functional>
 
 namespace Aardvark {
 
@@ -14,20 +15,41 @@ namespace Aardvark {
     DataTypes type;
     void* data;
 
-    bool returnedVal = false;
+    bool returned = false;
+    bool continued = false;
+    bool breaked = false;
 
     AdkValue();
     AdkValue(DataTypes type);
     AdkValue(string val);
     AdkValue(int val);
     AdkValue(double val);
+    AdkValue(bool val);
 
     AdkValue* operator+(AdkValue& val);
     AdkValue* operator-(AdkValue& val);
     AdkValue* operator*(AdkValue& val);
     AdkValue* operator/(AdkValue& val);
+    AdkValue* operator%(AdkValue& val);
+    AdkValue* operator==(AdkValue& val);
+    AdkValue* operator!=(AdkValue& val);
+    AdkValue* operator>=(AdkValue& val);
+    AdkValue* operator<=(AdkValue& val);
+    AdkValue* operator>(AdkValue& val);
+    AdkValue* operator<(AdkValue& val);
+    AdkValue* operator&&(AdkValue& val);
+    AdkValue* operator||(AdkValue& val);
 
+    bool toBool();
+    int toInt();
+    double toDouble();
     string toString();
+
+    bool isNone() {
+      return (
+        type == DataTypes::None
+      );
+    }
 
     template<typename T>
     T cast() {
@@ -63,6 +85,14 @@ namespace Aardvark {
     }
 
     Variable Set(string name, AdkValue* val) {
+      bool hasVariable = HasVar(name) || (name == "this");
+
+      if (hasVariable || parent == nullptr) {
+        return variables[name] = Variable(name, val);
+      } else if (parent != nullptr) {
+        return parent->Set(name, val);
+      }
+
       return variables[name] = Variable(name, val);
     }
 
@@ -71,7 +101,7 @@ namespace Aardvark {
       if ((!hasVariable && parent == nullptr) || (!hasVariable && parent == this)) {
         throw "Unknown Variable"; // Todo: Fix 'Error'
       } else if (!hasVariable) {
-        return Lookup(name);
+        return parent->Lookup(name);
       }
 
       return variables[name];
@@ -88,7 +118,9 @@ namespace Aardvark {
     private:
   };
 
-  extern "C" typedef AdkValue* (*NativeFunction)(vector<AdkValue*> args, Interpreter* interp);
+  // extern "C" typedef AdkValue* (*NativeFunction)(vector<AdkValue*> args, Interpreter* interp);
+
+  extern "C" typedef std::function<AdkValue*(vector<AdkValue*>, Interpreter*)> NativeFunction;
 
   class AdkFunction : public AdkValue {
     public:
@@ -96,6 +128,7 @@ namespace Aardvark {
 
     NativeFunction func = nullptr;
     AST* info = nullptr;
+    bool isStatic = false;
 
     string name = ""; // Name of function
 
@@ -143,12 +176,25 @@ namespace Aardvark {
   class AdkClass : public AdkValue {
     public:
     string className = "";
+    AdkObject* staticValues;
+
     AdkObject* thisObj;
     Interpreter* interpreter = nullptr;
 
     AdkClass();
     AdkClass(Interpreter* interp, string className);
     AdkClass(Interpreter* interp, string className, AdkObject* thisObj);
+
+    // For accessing static functions and properties
+    bool HasStaticVal(string name) {
+      return staticValues->HasProp(name);
+    }
+    Variable Set(string name, AdkValue* value) {
+      return staticValues->Set(name, value);
+    }
+    Variable Get(string name) {
+      return staticValues->Get(name);
+    }
 
     AdkValue* NewInstance(vector<AST*> args);
     AdkValue* NewInstance(vector<AdkValue*> args);

@@ -93,6 +93,13 @@ namespace Aardvark {
     advance();
   }
 
+  bool Parser::isBlockMerger(Token tok) {
+    return (
+      tok.equals(TokenTypes::Keyword, "while") ||
+      tok.equals(TokenTypes::Keyword, "if") ||
+      tok.equals(TokenTypes::Keyword, "else")
+    );
+  }
 
   vector<AST*> Parser::pDelimiters(string start, string end, string separator = "") {
     vector<AST*> values = {};
@@ -208,6 +215,7 @@ namespace Aardvark {
 
   AST* Parser::pAttribute(AST* expr) {
     expr->type = ASTTypes::Function;
+    expr->value = curTok;
 
     advance();
 
@@ -301,9 +309,20 @@ namespace Aardvark {
     AST* funcStmt = new AST(ASTTypes::Function, name);
     funcStmt->args = pDelimiters("(", ")", ",");
     funcStmt->block = pDelimiters("{", "}");
+    funcStmt->isStatic = isStatic;
 
     return funcStmt;
   };
+
+  AST* Parser::pReturn() {
+    Token retToken = curTok;
+    advance(); // skip over 'return'
+
+    AST* retStmt = new AST(ASTTypes::Return, retToken);
+    retStmt->assign = pExpression();
+
+    return retStmt;
+  }
 
   AST* Parser::pClass() {
     advance(); // skip over 'class'
@@ -354,6 +373,41 @@ namespace Aardvark {
     return new AST(); // throw error here or maybe act as comment idk
   }
 
+  AST* Parser::pIf() {
+    Token ifTok = curTok; // just 'if' keyword token
+
+    advance(); // skip over 'if'
+
+    AST* expr = pExpression();
+
+    AST* ifStmt = new AST(ASTTypes::If, ifTok);
+    ifStmt->condition = expr;
+
+    if (isBlockMerger(curTok)) {
+      ifStmt->block.push_back($pAll());
+    } else {
+      ifStmt->block = pDelimiters("{", "}");
+    }
+
+    if (curTok.equals(TokenTypes::Keyword, "else")) {
+      Token elseTok = curTok;
+
+      advance(); // skip over 'else'
+
+      AST* elsStmt = new AST(ASTTypes::Else, elseTok);
+
+      if (isBlockMerger(curTok)) {
+        elsStmt->block.push_back($pAll());
+      } else {
+        elsStmt->block = pDelimiters("{", "}");
+      }
+
+      ifStmt->els = elsStmt;
+    }
+
+    return ifStmt;
+  }
+
   // The main parsing branch if all else fails
   // meaning if it didn't already parse a function call or binary expression
   // anything like classes, function, variables, loops, and if statements will
@@ -363,6 +417,8 @@ namespace Aardvark {
       advance();
       AST* expr = pExpression();
       skipOver(TokenTypes::Delimiter, ")", curTok);
+
+      return expr;
     }
 
     AST* oldTok = new AST(curTok);
@@ -383,6 +439,11 @@ namespace Aardvark {
       return pClass();
     }
 
+    // Branches
+    if (curTok.equals(TokenTypes::Keyword, "if")) {
+      return pIf();
+    }
+
     // Loops
     if (curTok.equals(TokenTypes::Keyword , "while")) {
       return pWhile();
@@ -391,12 +452,16 @@ namespace Aardvark {
     // Loop Breaks
     if (curTok.equals(TokenTypes::Keyword , "break")) {
       oldTok->type = ASTTypes::Break;
+      advance();
 
       return oldTok;
     } else if (curTok.equals(TokenTypes::Keyword , "continue")) {
       oldTok->type = ASTTypes::Continue;
+      advance();
 
       return oldTok;
+    } else if (curTok.equals(TokenTypes::Keyword, "return")) {
+      return pReturn();
     }
 
     // Literals

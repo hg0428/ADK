@@ -10,6 +10,7 @@ namespace Aardvark {
   
   class Interpreter {
     public:
+    AdkContext* globalCtx = nullptr;
     AdkContext* ctx = nullptr;
     AST* ast;
 
@@ -38,21 +39,37 @@ namespace Aardvark {
 
     AdkValue* ConstructString(string data);
 
+    // Helper Methods to Clean Code
     AdkValue* iPlusEquals(AST* expr, AdkValue* rValue, AdkObject* thisObj);
     AdkValue* iMinusEquals(AST* expr, AdkValue* rValue, AdkObject* thisObj);
 		AdkValue* iMultEquals(AST* expr, AdkValue* rValue, AdkObject* thisObj);
 		AdkValue* iDivideEquals(AST* expr, AdkValue* rValue, AdkObject* thisObj);
 
+    // Functions and Objects
     AdkValue* iFunction(AST* expr, AdkObject* thisObj);
     AdkValue* iFunctionCall(AST* expr, AdkObject* thisObj);
     AdkValue* iClass(AST* expr);
+    AdkValue* iBinary(AST* expr);
+
+    // Literals
     AdkValue* iString(AST* expr);
     AdkValue* iInt(AST* expr);
     AdkValue* iDouble(AST* expr);
+    AdkValue* iBoolean(AST* expr);
+
+    // Other
     AdkValue* iScope(AST* expr);
     AdkValue* iAssign(AST* expr, AdkObject* thisObj);
     AdkValue* iIdentifier(AST* expr, AdkObject* thisObj);
     AdkValue* iInclude(AST* expr, AdkObject* thisObj);
+    AdkValue* iWhile(AST* expr, AdkObject* thisObj);
+    AdkValue* iIf(AST* expr, AdkObject* thisObj);
+
+    // Single keywords
+    AdkValue* iNone(AST* expr);
+    AdkValue* iReturn(AST* expr);
+    AdkValue* iBreak(AST* expr);
+    AdkValue* iContinue(AST* expr);
   };
 
 }; // namespace Aardvark

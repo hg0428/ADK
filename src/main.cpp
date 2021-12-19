@@ -1,6 +1,7 @@
 #include "aardvark.h"
 #include "parser.h"
 #include "modules/adkFilesystem.hpp"
+#include "modules/adkOs.hpp"
 
 using namespace Aardvark;
 
@@ -37,6 +38,7 @@ int main(int argc, char** argv) {
 
   Interpreter* interpreter = new Interpreter();
   initAdkFS(interpreter);
+  interpreter->defineModule("os", initOsModule(interpreter));
 
   interpreter->EvaluateFile(fullFile.string());
   

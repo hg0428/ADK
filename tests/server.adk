@@ -1,0 +1,12 @@
+#include os as os
+
+sock = os.Socket(8080)
+
+sock.bind()
+sock.listen()
+
+while true {
+  socket = sock.accept()
+
+  output(sock.recv(socket)) // recieves html headers
+}
