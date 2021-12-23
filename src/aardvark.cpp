@@ -2,9 +2,11 @@
 #include "ast.h"
 #include "parser.h"
 #include "aardvark.h"
+#include "gc.h"
 #include "fileHandler.hpp"
 #include "loadlib.hpp"
-
+#include <sstream>
+#include <stdexcept>
 namespace fs = std::filesystem;
 
 namespace Aardvark {
@@ -23,6 +25,10 @@ namespace Aardvark {
     return std::regex_match(token, std::regex(("((\\+|-)?[[:digit:]]+)(\\.(([[:digit:]]+)?))?")));
   }
 
+  bool isDouble(std::string token) {
+    return std::regex_match(token, std::regex(("(\\+|-)?[:digit:]+\\.[:digit:]+")));
+  }
+
   // AdkValue -> Aka the Main top node Value class -> Everything "value" inherits it
   AdkValue::AdkValue() {
     this->type = DataTypes::None;
@@ -35,6 +41,10 @@ namespace Aardvark {
   AdkValue::AdkValue(string val) {
     this->type = DataTypes::String;
     this->data = new std::string(val);
+  }
+  AdkValue::AdkValue(int64_t val) {
+    this->type = DataTypes::BigInt;
+    this->data = new int64_t(val);
   }
   AdkValue::AdkValue(int val) {
     this->type = DataTypes::Int;
@@ -57,6 +67,13 @@ namespace Aardvark {
         int valData = cast<int>();
         return new AdkValue(((int)valData) + val.cast<double>());
       }
+    } else if (type == DataTypes::BigInt) {
+      if (val.type == DataTypes::BigInt) {
+        return new AdkValue(cast<int64_t>() + val.cast<int64_t>());
+      } else if (val.type == DataTypes::Double) {
+        int64_t valData = cast<int64_t>();
+        return new AdkValue(((int64_t)valData) + val.cast<double>());
+      }
     } else if (type == DataTypes::Double) {
       if (val.type == DataTypes::Double) {
         return new AdkValue(cast<double>() + val.cast<double>());
@@ -77,6 +94,13 @@ namespace Aardvark {
         return new AdkValue(cast<int>() - val.cast<int>());
       } else if (val.type == DataTypes::Double) {
         int valData = cast<int>();
+        return new AdkValue(((double)valData) - val.cast<double>());
+      }
+    } else if (type == DataTypes::BigInt) {
+      if (val.type == DataTypes::BigInt) {
+        return new AdkValue(cast<int64_t>() - val.cast<int64_t>());
+      } else if (val.type == DataTypes::Double) {
+        int64_t valData = cast<int64_t>();
         return new AdkValue(((double)valData) - val.cast<double>());
       }
     } else if (type == DataTypes::Double) {
@@ -102,6 +126,13 @@ namespace Aardvark {
         int valData = cast<int>();
         return new AdkValue(((double)valData) * val.cast<double>());
       }
+    } else if (type == DataTypes::BigInt) {
+      if (val.type == DataTypes::BigInt) {
+        return new AdkValue(cast<int64_t>() * val.cast<int64_t>());
+      } else if (val.type == DataTypes::Double) {
+        int64_t valData = cast<int64_t>();
+        return new AdkValue(((double)valData) * val.cast<double>());
+      }
     } else if (type == DataTypes::Double) {
       if (val.type == DataTypes::Double) {
         return new AdkValue(cast<double>() * val.cast<double>());
@@ -120,6 +151,14 @@ namespace Aardvark {
         return new AdkValue(cast<int>() / val.cast<int>());
       } else if (val.type == DataTypes::Double) {
         int valData = cast<int>();
+
+        return new AdkValue(((double)valData) / val.cast<double>());
+      }
+    } else if (type == DataTypes::BigInt) {
+      if (val.type == DataTypes::BigInt) {
+        return new AdkValue(cast<int64_t>() / val.cast<int64_t>());
+      } else if (val.type == DataTypes::Double) {
+        int64_t valData = cast<int64_t>();
 
         return new AdkValue(((double)valData) / val.cast<double>());
       }
@@ -142,6 +181,12 @@ namespace Aardvark {
       } else if (val.type == DataTypes::Double) {
         return new AdkValue(cast<int>() % ((int)val.cast<double>()));
       }
+    } else if (type == DataTypes::BigInt) {
+      if (val.type == DataTypes::BigInt) {
+        return new AdkValue(cast<int64_t>() % val.cast<int64_t>());
+      } else if (val.type == DataTypes::Double) {
+        return new AdkValue(cast<int64_t>() % ((int64_t)val.cast<double>()));
+      }
     } else if (type == DataTypes::Double) {
       if (val.type == DataTypes::Double) {
         return new AdkValue(((int)cast<double>()) % ((int)val.cast<double>()));
@@ -159,6 +204,14 @@ namespace Aardvark {
         return new AdkValue(cast<int>() > val.cast<int>());
       } else if (val.type == DataTypes::Double) {
         int valData = cast<int>();
+
+        return new AdkValue(((double)valData) > val.cast<double>());
+      }
+    } else if (type == DataTypes::BigInt) {
+      if (val.type == DataTypes::BigInt) {
+        return new AdkValue(cast<int64_t>() > val.cast<int64_t>());
+      } else if (val.type == DataTypes::Double) {
+        int64_t valData = cast<int64_t>();
 
         return new AdkValue(((double)valData) > val.cast<double>());
       }
@@ -183,6 +236,14 @@ namespace Aardvark {
 
         return new AdkValue(((double)valData) >= val.cast<double>());
       }
+    } else if (type == DataTypes::BigInt) {
+      if (val.type == DataTypes::BigInt) {
+        return new AdkValue(cast<int64_t>() >= val.cast<int64_t>());
+      } else if (val.type == DataTypes::Double) {
+        int64_t valData = cast<int64_t>();
+
+        return new AdkValue(((double)valData) >= val.cast<double>());
+      }
     } else if (type == DataTypes::Double) {
       if (val.type == DataTypes::Double) {
         return new AdkValue(cast<double>() >= val.cast<double>());
@@ -201,6 +262,14 @@ namespace Aardvark {
         return new AdkValue(cast<int>() == val.cast<int>());
       } else if (val.type == DataTypes::Double) {
         int valData = cast<int>();
+
+        return new AdkValue(((double)valData) == val.cast<double>());
+      }
+    } else if (type == DataTypes::BigInt) {
+      if (val.type == DataTypes::BigInt) {
+        return new AdkValue(cast<int64_t>() == val.cast<int64_t>());
+      } else if (val.type == DataTypes::Double) {
+        int64_t valData = cast<int64_t>();
 
         return new AdkValue(((double)valData) == val.cast<double>());
       }
@@ -229,6 +298,14 @@ namespace Aardvark {
 
         return new AdkValue(((double)valData) != val.cast<double>());
       }
+    } else if (type == DataTypes::BigInt) {
+      if (val.type == DataTypes::BigInt) {
+        return new AdkValue(cast<int64_t>() != val.cast<int64_t>());
+      } else if (val.type == DataTypes::Double) {
+        int64_t valData = cast<int64_t>();
+
+        return new AdkValue(((double)valData) != val.cast<double>());
+      }
     } else if (type == DataTypes::Double) {
       if (val.type == DataTypes::Double) {
         return new AdkValue(cast<double>() != val.cast<double>());
@@ -247,6 +324,14 @@ namespace Aardvark {
         return new AdkValue(cast<int>() < val.cast<int>());
       } else if (val.type == DataTypes::Double) {
         int valData = cast<int>();
+
+        return new AdkValue(((double)valData) < val.cast<double>());
+      }
+    } else if (type == DataTypes::BigInt) {
+      if (val.type == DataTypes::BigInt) {
+        return new AdkValue(cast<int64_t>() < val.cast<int64_t>());
+      } else if (val.type == DataTypes::Double) {
+        int64_t valData = cast<int64_t>();
 
         return new AdkValue(((double)valData) < val.cast<double>());
       }
@@ -271,6 +356,14 @@ namespace Aardvark {
 
         return new AdkValue(((double)valData) <= val.cast<double>());
       }
+    } else if (type == DataTypes::BigInt) {
+      if (val.type == DataTypes::BigInt) {
+        return new AdkValue(cast<int64_t>() <= val.cast<int64_t>());
+      } else if (val.type == DataTypes::Double) {
+        int64_t valData = cast<int64_t>();
+
+        return new AdkValue(((double)valData) <= val.cast<double>());
+      }
     } else if (type == DataTypes::Double) {
       if (val.type == DataTypes::Double) {
         return new AdkValue(cast<double>() <= val.cast<double>());
@@ -292,6 +385,14 @@ namespace Aardvark {
 
         return new AdkValue(((double)valData) && val.cast<double>());
       }
+    } else if (type == DataTypes::BigInt) {
+      if (val.type == DataTypes::BigInt) {
+        return new AdkValue(cast<int64_t>() && val.cast<int64_t>());
+      } else if (val.type == DataTypes::Double) {
+        int64_t valData = cast<int64_t>();
+
+        return new AdkValue(((double)valData) && val.cast<double>());
+      }
     } else if (type == DataTypes::Double) {
       if (val.type == DataTypes::Double) {
         return new AdkValue(cast<double>() && val.cast<double>());
@@ -310,6 +411,14 @@ namespace Aardvark {
         return new AdkValue(cast<int>() || val.cast<int>());
       } else if (val.type == DataTypes::Double) {
         int valData = cast<int>();
+
+        return new AdkValue(((double)valData) || val.cast<double>());
+      }
+    } else if (type == DataTypes::BigInt) {
+      if (val.type == DataTypes::BigInt) {
+        return new AdkValue(cast<int64_t>() || val.cast<int64_t>());
+      } else if (val.type == DataTypes::Double) {
+        int64_t valData = cast<int64_t>();
 
         return new AdkValue(((double)valData) || val.cast<double>());
       }
@@ -356,6 +465,9 @@ namespace Aardvark {
       case DataTypes::Boolean:
         return (int)(cast<bool>());
 
+      case DataTypes::BigInt:
+        return (int)(cast<int64_t>());
+
       default:
         return 0;
     }
@@ -389,6 +501,13 @@ namespace Aardvark {
     switch(type) {
       case DataTypes::String:
         return cast<string>();
+
+      case DataTypes::Class: {
+        std::ostringstream str;
+        str << "[Class " << (((AdkClass*)this)->className) << "]";
+
+        return str.str();
+      }
         
       case DataTypes::Object: {
         AdkObject* cls = (AdkObject*)this;
@@ -419,6 +538,12 @@ namespace Aardvark {
       }
       case DataTypes::Int:
         return std::to_string(cast<int>());
+
+      case DataTypes::BigInt: {
+        std::ostringstream str;
+        str << cast<int64_t>();
+        return str.str();
+      }
 
       case DataTypes::Double: {
         std::ostringstream str;
@@ -487,11 +612,13 @@ namespace Aardvark {
     this->info = exp;
     this->name = exp->value.toString();
     this->interpreter = new Interpreter(*interp);
+    this->interpreter->gc = interp->gc;
   }
   AdkFunction::AdkFunction(Interpreter* interp, NativeFunction func, string name): AdkValue(DataTypes::Function) {
     this->func = func;
     this->name = name;
     this->interpreter = new Interpreter(*interp);
+    this->interpreter->gc = interp->gc;
     this->info = new AST(ASTTypes::None, Token(TokenTypes::Identifier, name));
   }
 
@@ -582,7 +709,7 @@ namespace Aardvark {
       if (i >= args.size()) {
         // argDef is an AST* type and to get the name of that argument is
         // stored in the token called value
-        interpreter->ctx->Set(argDef->value.toString(), new AdkValue());
+        interpreter->ctx->Set(argDef->value.toString(), interpreter->gc->addValue(new AdkValue()));
         continue;
       }
 
@@ -590,21 +717,22 @@ namespace Aardvark {
       interpreter->ctx->Set(argDef->value.toString(), args[i]);
     }
 
-    AdkValue* returnValue = new AdkValue();
+    AdkValue* returnValue = interpreter->gc->addValue(new AdkValue());
 
     for (AST* exp : info->block) {
       // Interprets every value in the function body
       returnValue = interpreter->interpret(exp, new AdkObject());
 
       if (returnValue->returned) {
-        // Returns to the old scope
-        interpreter->ctx = interpreter->ctx->parent;
-        return returnValue;        
+        break;     
       }
     }
 
     // Returns to the old scope
     interpreter->ctx = interpreter->ctx->parent;
+    if (interpreter->gc != nullptr) {
+      interpreter->gc->collectGarbage(interpreter->ctx, true);
+    }
     // interpreter->ctx = oldCtx.Extend();
 
     return returnValue;
@@ -659,12 +787,12 @@ namespace Aardvark {
       }
     }
 
-    return new AdkValue();
+    return gc->addValue(new AdkValue());
   }
 
   AdkValue* Interpreter::iClass(AST* expr) {
     string name = expr->value.toString();
-    AdkClass* cls = new AdkClass(this, name, new AdkObject(name));
+    AdkClass* cls = (AdkClass*)gc->addValue(new AdkClass(this, name, new AdkObject(name)));
 
     AdkContext* oldCtx = ctx;
     ctx = ctx->Extend();
@@ -678,6 +806,7 @@ namespace Aardvark {
         bool isStatic = ((AdkFunction*)value)->isStatic;
         
         if (isStatic) {
+          // value->isAccessible = true;
           cls->Set(exp->value.toString(), value);
           continue;
         }
@@ -687,17 +816,18 @@ namespace Aardvark {
       cls->thisObj->Set(exp->value.toString(), value); 
     }
     // cls->props = ctx->variables;
-    ctx = oldCtx;
+    ctx = ctx->parent;
+    ctx->Set(expr->value.toString(), (AdkValue*)cls).value;
 
     // Defines the 'class' in the current scope
-    return ctx->Set(expr->value.toString(), (AdkValue*)cls).value;
+    return (AdkValue*)cls;
   }
 
   AdkValue* Interpreter::iFunction(AST* expr, AdkObject* thisObj = new AdkObject()) {
     Token identifier = expr->value;
     string name = identifier.toString();
 
-    AdkFunction* func = new AdkFunction(this, expr);
+    AdkFunction* func = (AdkFunction*)gc->addValue(new AdkFunction(this, expr));
     func->isStatic = expr->isStatic;
 
     if (thisObj->isNone()) {
@@ -735,17 +865,18 @@ namespace Aardvark {
 
       for (int i = lValSize; i < rValSize + lValSize; i++) {
         string cStr = std::string(1, rVal[i - lValSize]);
-        AdkValue* c = new AdkValue(cStr);
+        AdkValue* c = gc->addValue(new AdkValue(cStr));
 
         ((AdkObject*)value)->Set(std::to_string(i), c);
       }
 
-      ((AdkObject*)value)->Set("length", new AdkValue(rValSize + lValSize));
+      ((AdkObject*)value)->Set("length", gc->addValue(new AdkValue(rValSize + lValSize)));
     }
 
 
     if (value->type == DataTypes::Int || value->type == DataTypes::Double) {
       value = *value + *rValue;
+      gc->addValue(value);
     }
 
 
@@ -840,9 +971,9 @@ namespace Aardvark {
     string name = identifier.toString();
     // Assignments with no right value
     if (expr->value.toString() == "++") {
-      return iPlusEquals(expr, new AdkValue(1), thisObj);
+      return iPlusEquals(expr, gc->addValue(new AdkValue(1)), thisObj);
     } else if (expr->value.toString() == "--") {
-      return iMinusEquals(expr, new AdkValue(1), thisObj);
+      return iMinusEquals(expr, gc->addValue(new AdkValue(1)), thisObj);
     }
 
     bool useCtx = expr->parent == nullptr && thisObj->isNone();
@@ -934,6 +1065,7 @@ namespace Aardvark {
 
     for (AST* arg : expr->args) {
       AdkValue* evaledArg = interpret(arg, new AdkObject());
+      evaledArg->isAccessible = true;
 
       args.push_back(evaledArg);
     }
@@ -941,10 +1073,13 @@ namespace Aardvark {
 
     if (func->type == DataTypes::Class) {
       ((AdkClass*)func)->interpreter = new Interpreter(*this);
+      ((AdkClass*)func)->interpreter->gc = gc;
+      func->isAccessible = true;
       
       return ((AdkClass*)func)->NewInstance(args);
     } else {
       ((AdkFunction*)func)->interpreter = new Interpreter(*this);
+      ((AdkFunction*)func)->interpreter->gc = gc;
 
       return (AdkValue*)((AdkFunction*)func)->Call(args, thisObj);
     }
@@ -953,19 +1088,20 @@ namespace Aardvark {
   AdkValue* Interpreter::ConstructString(string data) {
     AdkClass* strCls = (AdkClass*)ctx->Get("String").value;
     vector<AdkValue*> args = {};
-    args.push_back(new AdkValue(data));
+    args.push_back(gc->addValue(new AdkValue(data)));
 
     strCls->interpreter = new Interpreter(*this);
+    strCls->interpreter->gc = gc;
     AdkObject* str = (AdkObject*)strCls->NewInstance(args);
 
     for (int i = 0; i < data.length(); i++) {
       string cStr = std::string(1, data[i]);
-      AdkValue* c = new AdkValue(cStr);
+      AdkValue* c = gc->addValue(new AdkValue(cStr));
       str->Set(std::to_string(i), c);
       // Loop through string and set every character at current index
     }
 
-    str->Set("length", new AdkValue((int)data.length()));
+    str->Set("length", gc->addValue(new AdkValue((int)data.length())));
 
     return (AdkValue*)str;
   }
@@ -975,19 +1111,20 @@ namespace Aardvark {
     string data = expr->value.toString();
 
     vector<AdkValue*> args = {};
-    args.push_back(new AdkValue(data));
+    args.push_back(gc->addValue(new AdkValue(data)));
 
     strCls->interpreter = new Interpreter(*this);
+    strCls->interpreter->gc = gc;
     AdkObject* str = (AdkObject*)strCls->NewInstance(args);
 
     for (int i = 0; i < data.length(); i++) {
       string cStr = std::string(1, data[i]);
-      AdkValue* c = new AdkValue(cStr);
+      AdkValue* c = gc->addValue(new AdkValue(cStr));
       str->Set(std::to_string(i), c);
       // Loop through string and set every character at current index
     }
 
-    str->Set("length", new AdkValue((int)data.length()));
+    str->Set("length", gc->addValue(new AdkValue((int)data.length())));
 
     return (AdkValue*)str;
   }
@@ -996,21 +1133,21 @@ namespace Aardvark {
     Token numberTok = expr->value;
     int number = std::stoi(numberTok.toString());
 
-    return new AdkValue(number);
+    return gc->addValue(new AdkValue(number));
   }
 
   AdkValue* Interpreter::iDouble(AST* expr) {
     Token numberTok = expr->value;
     double number = std::stod(numberTok.toString());
 
-    return new AdkValue(number);
+    return gc->addValue(new AdkValue(number));
   }
 
   AdkValue* Interpreter::iBoolean(AST* expr) {
     Token boolTok = expr->value;
     bool boolean = boolTok.toString() == "true";
 
-    return new AdkValue(boolean);
+    return gc->addValue(new AdkValue(boolean));
   }
 
   AdkValue* Interpreter::GetDynamicLib(string fileName) {
@@ -1056,9 +1193,19 @@ namespace Aardvark {
     }
 
     if (hasModule(fileName)) {
+      AdkValue* obj = getModule(fileName);
+
+      if (obj->type != DataTypes::Object) {
+        std::cout << "Built in C++ modules must return an AdkObject!" << std::endl;
+        throw "err";
+      }
+
       if (expr->as == nullptr) {
-        std::cout << "Error: Builtin modules can only be assigned to a variable. No variable identified." << std::endl;
-        throw "ERR";
+        for (auto const& [ key, val ] : ((AdkObject*)obj)->props) {
+          ctx->Set(key, val.value).value;
+        }
+
+        return obj;
       }
 
       if (expr->as->type != ASTTypes::Identifier) {
@@ -1066,7 +1213,6 @@ namespace Aardvark {
         throw "err";
       }
 
-      AdkValue* obj = getModule(fileName);
 
       return ctx->Set(expr->as->value.toString(), obj).value;
     }
@@ -1105,7 +1251,7 @@ namespace Aardvark {
 
     EvalImport(data, true);
 
-    return new AdkValue();
+    return gc->addValue(new AdkValue());
   }
 
   AdkValue* Interpreter::iWhile(AST* expr, AdkObject* thisObj = new AdkObject()) {
@@ -1123,7 +1269,7 @@ namespace Aardvark {
 
         if (exp->type == ASTTypes::Break) {
           ctx = ctx->parent;
-          return new AdkValue();
+          return gc->addValue(new AdkValue());
         } else if (exp->type == ASTTypes::Continue) {
           break; // this breaks out the for loop basically doing a continue
         }
@@ -1138,29 +1284,34 @@ namespace Aardvark {
       ctx = ctx->parent;
     }
 
-    return new AdkValue();
+    // if (gc != nullptr) {
+    //   gc->collectGarbage(ctx, true);
+    // }
+
+    return gc->addValue(new AdkValue());
   }
 
   AdkValue* Interpreter::iNone(AST* expr) {
-    return new AdkValue();
+    return gc->addValue(new AdkValue());
   }
 
   AdkValue* Interpreter::iReturn(AST* expr) {
     AdkValue* returnVal = interpret(expr->assign, new AdkObject());
     returnVal->returned = true;
+    returnVal->isAccessible = true;
 
     return returnVal;
   }
 
   AdkValue* Interpreter::iBreak(AST* expr) {
-    AdkValue* breakVal = new AdkValue();
+    AdkValue* breakVal = gc->addValue(new AdkValue());
     breakVal->breaked = true;
 
     return breakVal;
   }
 
   AdkValue* Interpreter::iContinue(AST* expr) {
-    AdkValue* continueVal = new AdkValue();
+    AdkValue* continueVal = gc->addValue(new AdkValue());
     continueVal->continued = true;
 
     return continueVal;
@@ -1196,7 +1347,7 @@ namespace Aardvark {
       }
     }
 
-    return new AdkValue();
+    return gc->addValue(new AdkValue());
   }
 
   AdkValue* Interpreter::iBinary(AST* expr) {
@@ -1206,20 +1357,20 @@ namespace Aardvark {
     // These should interpret the right if only the left is evaulated
     if (op == "||") {
       if (leftValue->toBool()) {
-        return new AdkValue(true);
+        return gc->addValue(new AdkValue(true));
       }
       
       AdkValue* rightValue = interpret(expr->right, new AdkObject());
 
-      return *leftValue || *rightValue;
+      return gc->addValue(*leftValue || *rightValue);
     } else if (op == "&&") {
       if (!leftValue->toBool()) {
-        return new AdkValue(false);
+        return gc->addValue(new AdkValue(false));
       }
 
       AdkValue* rightValue = interpret(expr->right, new AdkObject());
 
-      return *leftValue && *rightValue;
+      return gc->addValue(*leftValue && *rightValue);
     }
 
     AdkValue* rightValue = interpret(expr->right, new AdkObject());
@@ -1229,29 +1380,29 @@ namespace Aardvark {
 
     // Todo: Make this better
     if (op == "+") {
-      return *leftValue + *rightValue;
+      return gc->addValue(*leftValue + *rightValue);
     } else if (op == "-") {
-      return *leftValue - *rightValue;
+      return gc->addValue(*leftValue - *rightValue);
     } else if (op == "*") {
-      return *leftValue * *rightValue;
+      return gc->addValue(*leftValue * *rightValue);
     } else if (op == "/") {
-      return *leftValue / *rightValue;
+      return gc->addValue(*leftValue / *rightValue);
     } else if (op == "%") {
-      return *leftValue % *rightValue;
+      return gc->addValue(*leftValue % *rightValue);
     } else if (op == "-") {
-      return *leftValue - *rightValue;
+      return gc->addValue(*leftValue - *rightValue);
     } else if (op == "==") {
-      return *leftValue == *rightValue;
+      return gc->addValue(*leftValue == *rightValue);
     } else if (op == "!=") {
-      return *leftValue != *rightValue;
+      return gc->addValue(*leftValue != *rightValue);
     } else if (op == ">") {
-      return *leftValue > *rightValue;
+      return gc->addValue(*leftValue > *rightValue);
     } else if (op == "<") {
-      return *leftValue < *rightValue;
+      return gc->addValue(*leftValue < *rightValue);
     } else if (op == ">=") {
-      return *leftValue >= *rightValue;
+      return gc->addValue(*leftValue >= *rightValue);
     } else if (op == "<=") {
-      return *leftValue <= *rightValue;
+      return gc->addValue(*leftValue <= *rightValue);
     }
 
     std::cout << "Error: unrecognized operator '" << op << "'" << std::endl;
@@ -1341,6 +1492,7 @@ namespace Aardvark {
     interp->curFile = file;
     interp->modules = modules;
     interp->exePath = exePath;
+    interp->gc = new AdkGC();
 
     interp->Evaluate(true);
 
@@ -1350,7 +1502,13 @@ namespace Aardvark {
       }
     }
 
-    return interp->ctx;
+    AdkContext* importCtx = interp->ctx;
+
+    interp->gc->collectGarbage(ctx, true);
+    delete interp->gc;
+    delete interp;
+
+    return importCtx;
   }
 
   void Interpreter::defineModule(string id, AdkValue* obj) {
@@ -1373,6 +1531,7 @@ namespace Aardvark {
     interp->curFile = file;
     interp->modules = modules;
     interp->exePath = exePath;
+    interp->gc = gc;
 
     interp->Evaluate(false);
 
@@ -1400,8 +1559,14 @@ namespace Aardvark {
     interp->globalCtx = ctx;
     interp->modules = modules;
     interp->exePath = exePath;
+    interp->gc = gc;
 
-    return interp->Evaluate(true);
+    AdkValue* value = interp->Evaluate(true);
+
+    // interp->gc->clean();
+    delete tree;
+
+    return value;
   }
 
   void Interpreter::DefineGlobals(AdkContext* newCtx) {
@@ -1409,11 +1574,38 @@ namespace Aardvark {
       for (AdkValue* arg : args) {
         std::cout << arg->toString() << " ";
       }
-
       std::cout << "\n";
       
       return new AdkValue();
     }, "output"));
+		
+		newCtx->Set("input", new AdkFunction(this, [](vector<AdkValue*> args, Interpreter* interp) {
+      for (AdkValue* arg : args) {
+        std::cout << arg->toString();
+				break;
+      }
+			std::string n;
+      std::cin >> n;
+      return interp->ConstructString(n);
+    }, "input"));
+		
+		newCtx->Set("Number", new AdkFunction(this, [](vector<AdkValue*> args, Interpreter* interp) {
+      std::string val = args[0]->toString();
+      int num = 0;
+      if (!isNumber(val)) {
+        std::cout << "ERROR: \"Number\" requires a number as its first value" << std::endl;
+        throw std::invalid_argument( "received non-number value" );
+      } else {
+        std::stringstream geek(val);
+        geek >> num;
+      }
+
+      if (isDouble(val)) {
+        return new AdkValue(std::stod(val));
+      }
+
+      return new AdkValue(num);
+    }, "Number"));
   }
 
   AdkValue* Interpreter::Evaluate(bool builtIns = false) {
@@ -1442,6 +1634,7 @@ namespace Aardvark {
     this->ast = o.ast;
     this->ctx = o.ctx;
     this->globalCtx = o.globalCtx;
+    this->gc = o.gc;
   }
 
 }; // namespace Aardvark

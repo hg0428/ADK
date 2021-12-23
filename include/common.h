@@ -9,4 +9,5 @@
 #include <map>
 #include <filesystem>
 #include <regex>
+#include <cstdint>
 #include "reservedWords.h"

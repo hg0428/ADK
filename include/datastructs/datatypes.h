@@ -5,6 +5,7 @@ namespace Aardvark {
     None,
     String,
     Int,
+    BigInt,
     Double,
     Boolean,
     Object,

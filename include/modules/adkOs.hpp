@@ -12,6 +12,15 @@
 #include <cstring>
 #include <regex>
 //We should probably rename this module "socket"
+/*Future Updates
+sock.accept returns a new object {
+	address:the port and ip address of the one who connected,
+	recv: function that receives data,
+	close:closes the socket
+}
+Also allow specifing a ip address as a optional argumnet.
+Try to make it as easy to use as possible.
+*/
 using namespace Aardvark;
 class AdkSocket {
   public:
@@ -65,10 +74,10 @@ class AdkSocket {
 };
 
 AdkValue* initSocket(int port, Interpreter* i) {
-  AdkObject* obj = new AdkObject("Socket");
+  AdkObject* obj = (AdkObject*)i->gc->addValue(new AdkObject("Socket"));
   AdkSocket* socket = new AdkSocket(port);
 
-  obj->Set("recv", new AdkFunction(
+  obj->Set("recv", i->gc->addValue(new AdkFunction(
     i,
     [=](vector<AdkValue*> args, Interpreter* i2) {
       if (args.size() < 1 || args[0]->type != DataTypes::Int) {
@@ -81,33 +90,33 @@ AdkValue* initSocket(int port, Interpreter* i) {
 
       return i2->ConstructString(data);
 
-    }, "recv")
+    }, "recv"))
   );
 
-  obj->Set("listen", new AdkFunction(
+  obj->Set("listen", i->gc->addValue(new AdkFunction(
     i,
     [=](vector<AdkValue*> args, Interpreter* i2) {
       socket->listen();
 
       return new AdkValue();
-    }, "listen")
+    }, "listen"))
   );
 
-  obj->Set("bind", new AdkFunction(
+  obj->Set("bind", i->gc->addValue(new AdkFunction(
     i,
     [=](vector<AdkValue*> args, Interpreter* i2) {
       return new AdkValue(socket->bindSocket());
-    }, "bind")
+    }, "bind"))
   );
 
-  obj->Set("accept", new AdkFunction(
+  obj->Set("accept", i->gc->addValue(new AdkFunction(
     i,
     [=](vector<AdkValue*> args, Interpreter* i2) {
       return new AdkValue(socket->accept());
-    }, "accept")
+    }, "accept"))
   );
 
-  obj->Set("close", new AdkFunction(
+  obj->Set("close", i->gc->addValue(new AdkFunction(
     i,
     [=](vector<AdkValue*> args, Interpreter* i2) {
       if (args.size() < 1 || args[0]->type != DataTypes::Int) {
@@ -119,15 +128,15 @@ AdkValue* initSocket(int port, Interpreter* i) {
       socket->close(fd);
 
       return new AdkValue();
-    }, "close")
+    }, "close"))
   );
 
   return obj;
 }
 
 AdkValue* initOsModule(Interpreter* i) {
-  AdkObject* obj = new AdkObject("os");
-  obj->Set("Socket", new AdkFunction(
+  AdkObject* obj = (AdkObject*)i->gc->addValue(new AdkObject("os"));
+  obj->Set("Socket", i->gc->addValue(new AdkFunction(
     i,
     [](vector<AdkValue*> args, Interpreter* i2) {
       if (args.size() < 1 || args[0]->type != DataTypes::Int) {
@@ -139,7 +148,7 @@ AdkValue* initOsModule(Interpreter* i) {
 
       return initSocket(port, i2);
 
-    }, "Socket")
+    }, "Socket"))
   );
 
   return (AdkValue*)obj;

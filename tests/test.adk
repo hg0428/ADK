@@ -1,1 +1,4 @@
-output("YOO")
+#include time
+output(time())
+a = input("Hello: ")
+output(a, "plus 1 =", Number(a)+1)

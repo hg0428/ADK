@@ -9,7 +9,6 @@ class Lol {
 }
 
 Lol() // -> 5
-
 output(Lol.test()) // -> 5
 
 i = 0

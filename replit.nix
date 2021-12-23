@@ -2,5 +2,6 @@
     deps = [
       pkgs.gdb-multitarget
       pkgs.valgrind
+      pkgs.python310
     ];
 }

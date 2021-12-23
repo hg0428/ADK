@@ -1,3 +1,4 @@
+#pragma once
 #include "./datastructs/datatypes.h"
 #include <functional>
 
@@ -6,6 +7,7 @@ namespace Aardvark {
   using std::string;
   using std::vector;
   using std::map;
+  using std::int64_t;
 
   class AdkContext;
   class Interpreter;
@@ -19,9 +21,12 @@ namespace Aardvark {
     bool continued = false;
     bool breaked = false;
 
+    bool isAccessible = false;
+
     AdkValue();
     AdkValue(DataTypes type);
     AdkValue(string val);
+    AdkValue(int64_t val);
     AdkValue(int val);
     AdkValue(double val);
     AdkValue(bool val);

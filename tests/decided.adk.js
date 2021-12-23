@@ -5,8 +5,8 @@
 counter = 0
 counter++
 output(counter)
-if counter<10 #jump 6
-#define fn as funct
+if counter < 10 #jump 6
+#define fn as funct //allows the syntax shown on the next line.
 fn a() {
 	//works just like funct
 }
@@ -49,7 +49,16 @@ class Test {
 	~string {
 		//called when it is being turned into a string. like __repr__ in python
 	}
-  funct increment() {
+	~get(attribute) {
+		//Called when an attribute is being retrieved
+	}
+	~call(...args) {
+		//Called when the instance is being called like a function
+	}
+	getter funct y() {
+		//getter functions are called to get the value of a attribute
+	}
+  static funct increment() {
     return this.x = 4; // This returns 4 and assigns 4 to this.x. yes
   }
 }

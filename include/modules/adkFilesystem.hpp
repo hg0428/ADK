@@ -47,10 +47,10 @@ class Filesystem {
 };
 
 AdkObject* createFileObject(Interpreter* i, std::string fileName) {
-  AdkObject* obj = new AdkObject("File");
-  obj->Set("filename", new AdkValue(fileName));
+  AdkObject* obj = (AdkObject*)i->gc->addValue(new AdkObject("File"));
+  obj->Set("filename", i->gc->addValue(new AdkValue(fileName)));
 
-  obj->Set("read", new AdkFunction(
+  obj->Set("read", i->gc->addValue(new AdkFunction(
     i,
     [](std::vector<AdkValue*> args, Interpreter* interp) {
       AdkObject* obj = (AdkObject*)interp->ctx->Get("this").value;
@@ -60,10 +60,10 @@ AdkObject* createFileObject(Interpreter* i, std::string fileName) {
 
       return interp->ConstructString(fileData);
 
-    }, "read")
+    }, "read"))
   );
 
-  obj->Set("write", new AdkFunction(
+  obj->Set("write", i->gc->addValue(new AdkFunction(
     i,
     [](std::vector<AdkValue*> args, Interpreter* interp) {
       std::string data = args[0]->toString();
@@ -75,10 +75,10 @@ AdkObject* createFileObject(Interpreter* i, std::string fileName) {
 
       return new AdkValue();
 
-    }, "write")
+    }, "write"))
   );
 
-  obj->Set("append", new AdkFunction(
+  obj->Set("append", i->gc->addValue(new AdkFunction(
     i,
     [](std::vector<AdkValue*> args, Interpreter* interp) {
       std::string data = args[0]->toString();
@@ -90,10 +90,10 @@ AdkObject* createFileObject(Interpreter* i, std::string fileName) {
 
       return new AdkValue();
 
-    }, "append")
+    }, "append"))
   );
 
-  obj->Set("file_size", new AdkFunction(
+  obj->Set("file_size", i->gc->addValue(new AdkFunction(
     i,
     [](std::vector<AdkValue*> args, Interpreter* interp) {
       AdkObject* obj = (AdkObject*)interp->ctx->Get("this").value;
@@ -103,7 +103,7 @@ AdkObject* createFileObject(Interpreter* i, std::string fileName) {
 
       return new AdkValue(fileData);
 
-    }, "file_size")
+    }, "file_size"))
   );
 
   return obj;
@@ -113,11 +113,10 @@ void initAdkFS(Interpreter* mainInterp) {
 
   AdkContext* ctx = mainInterp->ctx;
 
-  ctx->Set("open", new AdkFunction(
+  ctx->Set("open", mainInterp->gc->addValue(new AdkFunction(
     mainInterp,
     [](std::vector<AdkValue*> args, Interpreter* interp) {
       return (AdkValue*)createFileObject(interp, args[0]->toString());
-    }, "open")
+    }, "open"))
   );
-
 }

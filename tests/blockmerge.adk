@@ -16,9 +16,10 @@ if x == false while y < 6 {
 output(y) // -> 6
 
 if x == false {
-  while y < 12 {
+  while y < 24 {
     y++
   }
 }
 
-output(y) // -> 12
+
+output(y) // -> 24

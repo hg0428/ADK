@@ -1,7 +1,8 @@
 #include "aardvark.h"
 #include "parser.h"
+#include "gc.h"
 #include "modules/adkFilesystem.hpp"
-
+#include "modules/adkTime.hpp"
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32) && !defined(__CYGWIN__)
 #else
 #include "modules/adkOs.hpp"
@@ -43,15 +44,21 @@ int main(int argc, char** argv) {
   fs::path fullFile = fs::current_path() / fs::absolute(adkFile);
 
   Interpreter* interpreter = new Interpreter();
+  interpreter->gc = new AdkGC();
   interpreter->exePath = executableFullPath.string();
   initAdkFS(interpreter);
 
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32) && !defined(__CYGWIN__)
 #else
   interpreter->defineModule("os", initOsModule(interpreter));
+	interpreter->defineModule("time", initTimeModule(interpreter));
 #endif
-
+//Oh, thats how it works
   interpreter->EvaluateFile(fullFile.string());
+
+  delete interpreter->ctx;
+  delete interpreter->gc;
+  delete interpreter;
   
   return 0;
 }

@@ -28,6 +28,35 @@ g++ -std=c++20 -fPIC -c -ldl -I./include src/*.cpp library.cpp
 g++ -shared *.o -o library.adc
 ```
 
+**Example:**
+```c++
+#include "adkcHeader/adk.h"
+#include <string>
+#include <vector>
+
+using namespace Aardvark;
+
+AdkValue* printLol(std::vector<AdkValue*> args, Interpreter* i) {
+  std::cout << "Lol" << std::endl;
+
+  return new AdkValue();
+}
+
+std::vector<Definition> definitions = {
+  { "printLol", printLol, 0 }
+};
+
+ModuleInfo modInfo = {
+  "hithere",
+  definitions
+};
+
+ADK_INIT initmodule(Interpreter* i) {
+  modInfo.definitions = definitions;
+  return CreateModule(&modInfo);
+}
+```
+
 **NOTE:**
 Any time there is an update you will have to recompile the module for that update.
 This means you will have to get the newest source files.

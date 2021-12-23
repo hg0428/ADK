@@ -133,6 +133,7 @@ namespace Aardvark {
 		{"reference", TokenTypes::Keyword},
 		{"private", TokenTypes::Keyword},
 		{"await", TokenTypes::Keyword},
+		{"getter", TokenTypes::Keyword},
   };
 }; // namespace Aardvark
 

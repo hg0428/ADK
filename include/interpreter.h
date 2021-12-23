@@ -2,6 +2,7 @@
 #include "common.h"
 #include "ast.h"
 #include "values.h"
+#include "gc.h"
 
 namespace Aardvark {
   using std::string;
@@ -10,6 +11,8 @@ namespace Aardvark {
   
   class Interpreter {
     public:
+    AdkGC* gc = nullptr;
+    
     AdkContext* globalCtx = nullptr;
     AdkContext* ctx = nullptr;
     AST* ast;
