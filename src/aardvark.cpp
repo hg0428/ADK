@@ -10,7 +10,6 @@
 namespace fs = std::filesystem;
 
 namespace Aardvark {
-
   // Helper functions
   bool hasEnding(std::string const &fullString, std::string const &ending) {
     if (fullString.length() >= ending.length()) {
@@ -1596,12 +1595,12 @@ namespace Aardvark {
         std::cout << "ERROR: \"Number\" requires a number as its first value" << std::endl;
         throw std::invalid_argument( "received non-number value" );
       } else {
-        std::stringstream geek(val);
-        geek >> num;
-      }
-
-      if (isDouble(val)) {
-        return new AdkValue(std::stod(val));
+					if (isDouble(val)) {
+	        	return new AdkValue(std::stod(val));
+	      	} else {
+		        std::stringstream geek(val);
+		        geek >> num;
+					}
       }
 
       return new AdkValue(num);

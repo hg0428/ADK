@@ -1,21 +1,23 @@
+name = input("Hello, what is your name? ")
+output("Hi,", name, "!")
 #include test.adk // -> outputs YOO
 xy = "Hello,"
 output(xy) // -> Hello,
 xy.printLength() // -> 6
 xy += "test"
+output(xy)
 xy.printLength() // -> 10
 
 output()
 file = open("./tests/ideas.js")
-output(file.read())
+//output(file.read())
 output(file.file_size()) // should be 0.9345
-tes = 5.1
+tes = 5
 tes *= 4
 output(tes++) // -> 20.4
 output(++tes) // -> 22.4
 tes++
 tes--
-tes-=0.4
 output(tes) // -> 22
 
 class Test {
@@ -54,25 +56,11 @@ a.moveY(-5)
 a.print() // X: 8 --\n--Y: 4
 
 output()
-
-output(xy[0]) // -> H
-output(xy[1]) // -> e
-output(xy[2]) // -> l
-output(xy[3]) // -> l
-output(xy[a.x]) // -> s
-output(xy[5]) // -> ,
-output(xy[6]) // -> t
-output(xy[7]) // -> e
-output(xy[8]) // -> s
-output(xy[9]) // -> t
-
-// Yay, all this code works! (4:01 PM UTC-7)
-// What happened? I haven't changed anything since 4:01! Oh no! (4:26 PM UTC-7)
-
-// Don't worry fixed it all (9:09 AM UTC-7,  11:10 AM EST)
-
-// The problem was that apparently if the last letter or character in the file was a 'whitespace' character like a space it would completely ignore that line.
-// The file reader was the culprit
+i=0
+while i < xy.length {
+	output(xy[i])
+	i++
+}
 
 // Next thing to add is include directives
 // and then we can start making libraries
