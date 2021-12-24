@@ -5,7 +5,7 @@
 #include "modules/adkTime.hpp"
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32) && !defined(__CYGWIN__)
 #else
-#include "modules/adkOs.hpp"
+#include "modules/adkSocket.hpp"
 #endif
 
 using namespace Aardvark;
@@ -50,7 +50,7 @@ int main(int argc, char** argv) {
 
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32) && !defined(__CYGWIN__)
 #else
-  interpreter->defineModule("os", initOsModule(interpreter));
+  interpreter->defineModule("socket", initSocketModule(interpreter));
 	interpreter->defineModule("time", initTimeModule(interpreter));
 #endif
 //Oh, thats how it works

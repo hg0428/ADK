@@ -134,8 +134,8 @@ AdkValue* initSocket(int port, Interpreter* i) {
   return obj;
 }
 
-AdkValue* initOsModule(Interpreter* i) {
-  AdkObject* obj = (AdkObject*)i->gc->addValue(new AdkObject("os"));
+AdkValue* initSocketModule(Interpreter* i) {
+  AdkObject* obj = (AdkObject*)i->gc->addValue(new AdkObject("socket"));
   obj->Set("Socket", i->gc->addValue(new AdkFunction(
     i,
     [](vector<AdkValue*> args, Interpreter* i2) {

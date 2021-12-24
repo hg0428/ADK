@@ -1,4 +1,4 @@
 #include time
-output(time())
+output(dateTime())
 a = input("Enter a number: ")
 output(a, "plus 1 =", Number(a)+1)
