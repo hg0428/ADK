@@ -1,19 +1,29 @@
 #include time
 #include random
-//
+
 funct Choice(l) {
+	len=l.length
+	num=randomInt(len - 1)
+	return l[num]
+}
+funct genRandom(length) {
+	string = ""
 	i=0
-	s=""
-	while i < l.length {
-		a=randomInt(l.length-1)
-		output(a)
-		s+=l[a]
+	while i < length {
+		string += Choice("abcdefghijklmnopqrstuvwxyz")
 		i++
 	}
-	return s
+	output(string)
 }
-output(Choice("hii"))
-\\
-output(time("y"))
+genRandom(20)
+genRandom(20)
+genRandom(20)
+genRandom(20)
+genRandom(20)
+genRandom(20)
+genRandom(20)
+genRandom(20)
+output(time("y")+1970, "years since 0 A.D.")
 a = input("Enter a number: ")
 output(a, "plus 1 =", Number(a)+1)
+//output(String(null, null))

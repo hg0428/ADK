@@ -59,28 +59,43 @@ namespace Aardvark {
   }
 
   AdkValue* AdkValue::operator+(AdkValue& val) {
+		if (type == DataTypes::String) {
+			if (val.type == DataTypes::String) {
+				std::cout << "string";
+				return new AdkValue(cast<std::string>() + val.cast<std::string>());
+			}
+		}
     if (type == DataTypes::Int) {
       if (val.type == DataTypes::Int) {
         return new AdkValue(cast<int>() + val.cast<int>());
       } else if (val.type == DataTypes::Double) {
         int valData = cast<int>();
         return new AdkValue(((int)valData) + val.cast<double>());
+      }else if (val.type == DataTypes::BigInt) {
+        int64_t valData = cast<int64_t>();
+        return new AdkValue(((int64_t)valData) + val.cast<int64_t>());
       }
-    } else if (type == DataTypes::BigInt) {
+    }/*							*/
+			
+		else if (type == DataTypes::BigInt) {
       if (val.type == DataTypes::BigInt) {
         return new AdkValue(cast<int64_t>() + val.cast<int64_t>());
       } else if (val.type == DataTypes::Double) {
         int64_t valData = cast<int64_t>();
-        return new AdkValue(((int64_t)valData) + val.cast<double>());
+        return new AdkValue(((double)valData) + val.cast<double>());
+      } else if (val.type == DataTypes::Int) {
+        int64_t valData = cast<int64_t>();
+        return new AdkValue(((int64_t)valData) + val.cast<int64_t>());
       }
-    } else if (type == DataTypes::Double) {
+			
+    } /*							*/
+			
+		else if (type == DataTypes::Double) {
       if (val.type == DataTypes::Double) {
         return new AdkValue(cast<double>() + val.cast<double>());
       } else if (val.type == DataTypes::Int) {
-        double thisVal = cast<double>();
-        int secondVal = val.cast<int>();
-
-        return new AdkValue(thisVal + ((double)secondVal));
+        int valData = val.cast<int>();
+        return new AdkValue(cast<double>() + ((double)valData));
       }
     }
 
@@ -93,16 +108,27 @@ namespace Aardvark {
         return new AdkValue(cast<int>() - val.cast<int>());
       } else if (val.type == DataTypes::Double) {
         int valData = cast<int>();
-        return new AdkValue(((double)valData) - val.cast<double>());
+        return new AdkValue(((int)valData) - val.cast<double>());
+      }else if (val.type == DataTypes::BigInt) {
+        int64_t valData = cast<int64_t>();
+        return new AdkValue(((int64_t)valData) - val.cast<int64_t>());
       }
-    } else if (type == DataTypes::BigInt) {
+    }/*							*/
+			
+		else if (type == DataTypes::BigInt) {
       if (val.type == DataTypes::BigInt) {
         return new AdkValue(cast<int64_t>() - val.cast<int64_t>());
       } else if (val.type == DataTypes::Double) {
         int64_t valData = cast<int64_t>();
         return new AdkValue(((double)valData) - val.cast<double>());
+      } else if (val.type == DataTypes::Int) {
+        int64_t valData = cast<int64_t>();
+        return new AdkValue(((int64_t)valData) - val.cast<int64_t>());
       }
-    } else if (type == DataTypes::Double) {
+			
+    } /*							*/
+			
+		else if (type == DataTypes::Double) {
       if (val.type == DataTypes::Double) {
         return new AdkValue(cast<double>() - val.cast<double>());
       } else if (val.type == DataTypes::Int) {
@@ -873,7 +899,7 @@ namespace Aardvark {
     }
 
 
-    if (value->type == DataTypes::Int || value->type == DataTypes::Double) {
+    if (value->type == DataTypes::Int || value->type == DataTypes::Double || value->type == DataTypes::BigInt) {
       value = *value + *rValue;
       gc->addValue(value);
     }
@@ -905,7 +931,7 @@ namespace Aardvark {
     AdkValue* oldValue = value;
 
 
-    if (value->type == DataTypes::Int || value->type == DataTypes::Double) {
+    if (value->type == DataTypes::Int || value->type == DataTypes::Double || value->type == DataTypes::BigInt) {
       value = *value - *rValue;
     }
 
@@ -932,7 +958,7 @@ namespace Aardvark {
       ? ctx->Get(name).value
       : thisObj->Get(name).value;
 		//Add string mode later: "test"*=3 becomes "testtesttest"
-    if (value->type == DataTypes::Int || value->type == DataTypes::Double) {
+    if (value->type == DataTypes::Int || value->type == DataTypes::Double || value->type == DataTypes::BigInt) {
       value = *value * *rValue;
     }
 
@@ -953,7 +979,7 @@ namespace Aardvark {
       ? ctx->Get(name).value
       : thisObj->Get(name).value;
 		//Add string mode later: "test"*=3 becomes "testtesttest"
-    if (value->type == DataTypes::Int || value->type == DataTypes::Double) {
+    if (value->type == DataTypes::Int || value->type == DataTypes::Double || value->type == DataTypes::BigInt) {
       value = *value / *rValue;
     }
 
@@ -1579,10 +1605,7 @@ namespace Aardvark {
     }, "output"));
 		
 		newCtx->Set("input", new AdkFunction(this, [](vector<AdkValue*> args, Interpreter* interp) {
-      for (AdkValue* arg : args) {
-        std::cout << arg->toString();
-				break;
-      }
+      std::cout << args[0]->toString();
 			std::string n;
       std::cin >> n;
       return interp->ConstructString(n);
@@ -1605,6 +1628,13 @@ namespace Aardvark {
 
       return new AdkValue(num);
     }, "Number"));
+		/*newCtx->Set("String", new AdkFunction(this, [](vector<AdkValue*> args, Interpreter* interp) {
+			std::string val = "";
+			 for (AdkValue* arg : args) {
+				val += arg->toString();
+      }
+      return new AdkValue(val);
+    }, "String"));*/
   }
 
   AdkValue* Interpreter::Evaluate(bool builtIns = false) {
