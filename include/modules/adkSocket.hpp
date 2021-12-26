@@ -11,7 +11,6 @@
 #include <string>
 #include <cstring>
 #include <regex>
-//We should probably rename this module "socket"
 /*Future Updates
 sock.accept returns a new object {
 	address:the port and ip address of the one who connected,

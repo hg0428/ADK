@@ -3,6 +3,7 @@
 #include "gc.h"
 #include "modules/adkFilesystem.hpp"
 #include "modules/adkTime.hpp"
+#include "modules/adkRandom.hpp"
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32) && !defined(__CYGWIN__)
 #else
 #include "modules/adkSocket.hpp"
@@ -52,6 +53,7 @@ int main(int argc, char** argv) {
 #else
   interpreter->defineModule("socket", initSocketModule(interpreter));
 	interpreter->defineModule("time", initTimeModule(interpreter));
+	interpreter->defineModule("random", initRandomModule(interpreter));
 #endif
 //Oh, thats how it works
   interpreter->EvaluateFile(fullFile.string());

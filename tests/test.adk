@@ -1,4 +1,19 @@
 #include time
-output(dateTime())
+#include random
+//
+funct Choice(l) {
+	i=0
+	s=""
+	while i < l.length {
+		a=randomInt(l.length-1)
+		output(a)
+		s+=l[a]
+		i++
+	}
+	return s
+}
+output(Choice("hii"))
+\\
+output(time("y"))
 a = input("Enter a number: ")
 output(a, "plus 1 =", Number(a)+1)
