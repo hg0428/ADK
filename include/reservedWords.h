@@ -117,6 +117,7 @@ namespace Aardvark {
     {"for", TokenTypes::Keyword},
     {"while", TokenTypes::Keyword},
     {"if", TokenTypes::Keyword},
+		{"is", TokenTypes::Keyword},
     {"else", TokenTypes::Keyword},
 		{"match", TokenTypes::Keyword}, //works like switch
 		{"case", TokenTypes::Keyword},

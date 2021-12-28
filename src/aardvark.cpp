@@ -1,4 +1,5 @@
 #include "common.h"
+#include <cmath>
 #include "ast.h"
 #include "parser.h"
 #include "aardvark.h"
@@ -1414,6 +1415,8 @@ namespace Aardvark {
       return gc->addValue(*leftValue / *rightValue);
     } else if (op == "%") {
       return gc->addValue(*leftValue % *rightValue);
+    } else if (op == "^") {
+      return gc->addValue(new AdkValue(pow(leftValue->toDouble(), rightValue->toDouble())));
     } else if (op == "-") {
       return gc->addValue(*leftValue - *rightValue);
     } else if (op == "==") {

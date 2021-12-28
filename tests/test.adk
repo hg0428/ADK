@@ -15,6 +15,8 @@ funct genRandom(length) {
 	}
 	output(string)
 }
+output("8 Random strings of length 20:")
+output()
 genRandom(20)
 genRandom(20)
 genRandom(20)
@@ -23,7 +25,11 @@ genRandom(20)
 genRandom(20)
 genRandom(20)
 genRandom(20)
+output()
 output(time("y")+1970, "years since 0 A.D.")
+output(time(), "nanoseconds since 1970.")
+//
 a = input("Enter a number: ")
 output(a, "plus 1 =", Number(a)+1)
+\\
 //output(String(null, null))
