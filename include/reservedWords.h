@@ -33,6 +33,7 @@ namespace Aardvark {
       {"*=", "*="},
       {"/=", "/="},
       {"-=", "-="},
+			{"^=", "^="},
       {"==", "=="},
       {"!=", "!="},
       {"<=", "<="},
@@ -46,7 +47,7 @@ namespace Aardvark {
     },
     {
       {"xor", "x|"},
-			{"not", "x|"},
+			{"not", "!"},
       {"and", "&&"},
     }
   };
@@ -72,7 +73,7 @@ namespace Aardvark {
 		"*=",
 		"/=",
 		"%=", //modulus
-		"**=", //exponet
+		"^=", //exponet
 		"|=" // assigns if left is none, else does nothing not implemented yet
   };
 

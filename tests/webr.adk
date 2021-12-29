@@ -1,5 +1,0 @@
-//TO be the webr module.
-#include webr.server
-
-app = APP()
-app.serverFromFolder("folder")

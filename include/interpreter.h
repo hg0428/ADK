@@ -48,6 +48,7 @@ namespace Aardvark {
     AdkValue* iMinusEquals(AST* expr, AdkValue* rValue, AdkObject* thisObj);
 		AdkValue* iMultEquals(AST* expr, AdkValue* rValue, AdkObject* thisObj);
 		AdkValue* iDivideEquals(AST* expr, AdkValue* rValue, AdkObject* thisObj);
+		AdkValue* iExponetEquals(AST* expr, AdkValue* rValue, AdkObject* thisObj);
 
     // Functions and Objects
     AdkValue* iFunction(AST* expr, AdkObject* thisObj);

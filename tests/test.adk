@@ -1,3 +1,4 @@
+output("Hello")
 #include time
 #include random
 
@@ -32,4 +33,3 @@ output(time(), "nanoseconds since 1970.")
 a = input("Enter a number: ")
 output(a, "plus 1 =", Number(a)+1)
 \\
-//output(String(null, null))

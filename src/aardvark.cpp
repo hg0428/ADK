@@ -988,9 +988,28 @@ Add the xor.
     AdkValue* value = useCtx
       ? ctx->Get(name).value
       : thisObj->Get(name).value;
-		//Add string mode later: "test"*=3 becomes "testtesttest"
     if (value->type == DataTypes::Int || value->type == DataTypes::Double || value->type == DataTypes::BigInt) {
       value = *value / *rValue;
+    }
+
+
+    if (useCtx) {
+      return ctx->Set(name, value).value;
+    } else {
+      return thisObj->Set(name, value).value;
+    }
+  }
+AdkValue* Interpreter::iExponetEquals(AST* expr, AdkValue* rValue, AdkObject* thisObj = new AdkObject()) {
+    Token identifier = expr->left->value;
+    string name = identifier.toString();
+    bool useCtx = expr->parent == nullptr && thisObj->isNone();
+
+    // the lValue object
+    AdkValue* value = useCtx
+      ? ctx->Get(name).value
+      : thisObj->Get(name).value;
+    if (value->type == DataTypes::Int || value->type == DataTypes::Double || value->type == DataTypes::BigInt) {
+      value = new AdkValue(pow(value->toDouble(), rValue->toDouble()));
     }
 
 
@@ -1025,6 +1044,8 @@ Add the xor.
       return iMultEquals(expr, rValue, thisObj);
     } else if (expr->value.toString() == "/=") {
       return iDivideEquals(expr, rValue, thisObj);
+    }	else if (expr->value.toString() == "^=") {
+      return iExponetEquals(expr, rValue, thisObj);
     }
 
 
@@ -1638,19 +1659,18 @@ Add the xor.
 
       return new AdkValue(num);
     }, "Number"));
-		/*newCtx->Set("String", new AdkFunction(this, [](vector<AdkValue*> args, Interpreter* interp) {
+		newCtx->Set("toString", new AdkFunction(this, [](vector<AdkValue*> args, Interpreter* interp) {
 			std::string val = "";
 			 for (AdkValue* arg : args) {
 				val += arg->toString();
       }
       return new AdkValue(val);
-    }, "String"));*/
+    }, "toString"));
   }
 
   AdkValue* Interpreter::Evaluate(bool builtIns = false) {
     if (builtIns) {
       EvalBuiltIn("./builtin/String.adk", true);
-
       DefineGlobals(ctx);
     }
     
