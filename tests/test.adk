@@ -18,6 +18,9 @@ funct genRandom(length) {
 }
 output("8 Random strings of length 20:")
 output()
+x=2
+x ^= 4
+output(x)
 genRandom(20)
 genRandom(20)
 genRandom(20)

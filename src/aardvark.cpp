@@ -62,7 +62,7 @@ namespace Aardvark {
   AdkValue* AdkValue::operator+(AdkValue& val) {
 		if (type == DataTypes::String) {
 			if (val.type == DataTypes::String) {
-				std::cout << "string";
+				//std::cout << "string";
 				return new AdkValue(cast<std::string>() + val.cast<std::string>());
 			}
 		}
@@ -477,12 +477,16 @@ Add the xor.
 
       case DataTypes::Int:
         return (cast<int>() > 0);
+			
+			case DataTypes::BigInt:
+        return (cast<int64_t>() > 0);
 
       case DataTypes::Double:
         return (cast<double>() > 0.0);
 			
 			case DataTypes::String:
         return (cast<string>() != "");
+			
       default:
         return false;
     }
@@ -739,7 +743,7 @@ Add the xor.
       /* eg:
           funct test(x, y) {};
 
-          test(5) // -> the y argument will be 'none' \\
+          test(5) // -> the y argument will be 'null' \\
       */
       if (i >= args.size()) {
         // argDef is an AST* type and to get the name of that argument is
@@ -1034,8 +1038,7 @@ AdkValue* Interpreter::iExponetEquals(AST* expr, AdkValue* rValue, AdkObject* th
     AdkValue* rValue = interpret(expr->right, new AdkObject());
 
     // if (rValue->type == DataTypes::Int)
-    //   std::cout << "DEBUG: " << rValue->cast<double>() << std::endl;
-
+    //   std::cout << "DEBUG: " << rValue->cast<double>() << std::endl
     if (expr->value.toString() == "+=") {
       return iPlusEquals(expr, rValue, thisObj);
     } else if (expr->value.toString() == "-=") {

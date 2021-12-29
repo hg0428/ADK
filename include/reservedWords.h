@@ -22,6 +22,7 @@ namespace Aardvark {
       {"-", "-"},
       {"*", "*"},
       {"/", "/"},
+			{"^", "^"},
       {"%", "%"},
       {"<", "<"},
       {">", ">"},
@@ -87,6 +88,7 @@ namespace Aardvark {
     {"*=", 2},
     {"/=", 2},
     {"|=", 2},
+		{"^=", 2},
     {"||", 4},
     {"or", 4},
 		{"x|", 4},
@@ -103,7 +105,8 @@ namespace Aardvark {
     {"!=", 7},
     {"+",  10},
     {"-",  10},
-    {"*",  20}, // also all function are defined in lexer.h and token.h
+    {"*",  20},
+		{"^",  20},// also all function are defined in lexer.h and token.h
     {"/",  20}, // it checks in lexer.cpp near the top and does the tokenizing in tokenize
     {"%",  20}, // Try it and the idea might come in my head and ill be able to help maybe
 		{"//",  11}//Where is the code that checks for the symbols?
