@@ -456,10 +456,19 @@ namespace Aardvark {
         return new AdkValue(cast<double>() || ((double)valData));
       }
     }
-
     return this;
   }
+/*
 
+
+
+
+Add the xor.
+
+
+
+
+*/
   bool AdkValue::toBool() {
     // Checks the type of the object and converts it accordingly
     switch(type) {
@@ -1381,7 +1390,7 @@ namespace Aardvark {
     string op = expr->op.toString();
 
     // These should interpret the right if only the left is evaulated
-    if (op == "||") {
+    if (op == "||"|| op == "or") {
       if (leftValue->toBool()) {
         return gc->addValue(new AdkValue(true));
       }
@@ -1389,7 +1398,7 @@ namespace Aardvark {
       AdkValue* rightValue = interpret(expr->right, new AdkObject());
 
       return gc->addValue(*leftValue || *rightValue);
-    } else if (op == "&&") {
+    } else if (op == "&&" || op == "and") {
       if (!leftValue->toBool()) {
         return gc->addValue(new AdkValue(false));
       }
@@ -1417,8 +1426,6 @@ namespace Aardvark {
       return gc->addValue(*leftValue % *rightValue);
     } else if (op == "^") {
       return gc->addValue(new AdkValue(pow(leftValue->toDouble(), rightValue->toDouble())));
-    } else if (op == "-") {
-      return gc->addValue(*leftValue - *rightValue);
     } else if (op == "==") {
       return gc->addValue(*leftValue == *rightValue);
     } else if (op == "!=") {
