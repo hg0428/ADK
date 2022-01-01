@@ -1,1 +1,1 @@
-run = "bash compile.sh"
+run = "make -s clean ; make -s"
